@@ -22,13 +22,19 @@
         "no-underscore-dangle": 0,
         "no-unused-vars": 0,
         "no-console": 0,
+        "linebreak-style": 0,
+        "no-param-reassign": 0,
+        "no-multi-spaces": 0,
+        "operator-linebreak": 0,
+        "func-names": 0,
         "prettier/prettier": [
             "error",
             {
               "trailingComma": "all",
               "singleQuote": true,
               "printWidth": 80,
-              "semi": true
+              "semi": true,
+              "endOfLine": "auto"
             }
           ]
     }

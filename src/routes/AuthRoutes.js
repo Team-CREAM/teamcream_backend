@@ -44,8 +44,12 @@ router.post('/login', async (req, res) => {
 });
 router.put('/forgotpassword', async (req, res) => {
   const { email } = req.body;
+  console.log(email);
   await User.findOne({ email }, (err, user) => {
     if (!user || err) {
+      
+      console.log(user);
+      console.log(err);
       return res.json({ error: 'User with this email does not exist' });
     }
     const token = jwt.sign({ userId: user._id }, 'GARY_IS_LOVE', {
@@ -56,7 +60,7 @@ router.put('/forgotpassword', async (req, res) => {
         return res.json({ error: 'User with this email does not exist' });
       }
       console.log('reset link saved to database');
-      return res.json({ success: token });
+      return res.json({ success: true });
     });
     const mailTransporter = nodemailer.createTransport({
       service: 'gmail',

@@ -93,19 +93,11 @@ router.post('/resetpassword', async (req, res) => {
   const { token, newPassword } = req.body;
   jwt.verify(token, 'GARY_IS_LOVE', async (err, data) => {
     if (err) {
-<<<<<<< HEAD
       return res.json({ err: 'Incorrect or expired token' });
     }
     await User.findOne({ resetLink: token }, (err, user) => {
       if (err) {
         return res.json({ err: 'User does not exist' });
-=======
-      return res.status(400).json({ err: 'Incorrect or expired token' });
-    }
-    await User.findOne({ resetLink: token }, (err, user) => {
-      if (err) {
-        return res.status(400).json({ err: 'User does not exist' });
->>>>>>> a3ac6c2c9b1e64799152a56c974ef3fa7b6caf04
       }
       // console.log(newPassword);
       // user.updateOne({ password: newPassword, resetLink: '' });

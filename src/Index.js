@@ -3,6 +3,7 @@ require('./models/User');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const requireAuth = require('./middlewares/requireAuth');
 
@@ -10,6 +11,11 @@ const requireAuth = require('./middlewares/requireAuth');
 const authRoutes = require('./routes/AuthRoutes');
 
 const app = express();
+
+app.use(express.static(`${__dirname}/reset`));
+// app.get('/resetpassword', (req, res) => {
+//   res.sendFile(`${__dirname}/reset/index.html`);
+// });
 
 // Json
 app.use(bodyParser.json());

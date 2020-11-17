@@ -3,36 +3,62 @@
 
 <head>
     <title>Reset Password</title>
-    <link href="./reset.css" rel="stylesheet" type="text/css" media="all" />
-    <script type="text/javascript" src="reset.js"></script>
+    <link href="reset.css" rel="stylesheet" type="text/css" media="all" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="keywords"
         content="Reset Password Form Responsive, Login form web template, Sign up Web Templates, Flat Web Templates, Login signup Responsive web template, Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, SonyEricsson, Motorola web design" />
-
     <link href='//fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900' rel='stylesheet' type='text/css'>
 </head>
-<div class="elelment">
-    <div class="element-main" id="reset_form">
-        <h1>Reset Password</h1>
-        <p> Create a new password that is at least 6 characters long. A strong password is combination of letters,
-            numbers, and punctuation marks.</p>
-        <form onsubmit="resetPassword()">
-            <input pattern=".{6,}" id="password" type="text" value="Your new password" onfocus="this.value = '';"
-                onblur="if (this.value == '') {this.value = 'Your new password';}">
-            <p> Please re-enter your new password</p>
-            <input id="confirmPassword" type="text" value="Confirm password" onfocus="this.value = '';"
-                onblur="if (this.value == '') {this.value = 'Confirm password';}">
-            <input type="submit" value="Reset my Password">
-        </form>
-        <img src="images/cooking_with_crumbs_logo.png" Image Logo id="image_logo" width="200px" height="200px">
-    </div>
-</div>
+
 
 <body>
+    <div class="elelment">
+        <div class="element-main" id="reset_form">
+            <h1>Reset Password</h1>
+            <p> Create a new password that is at least 6 characters long. A strong password is combination of letters,
+                numbers, and punctuation marks.</p>
+            <form onsubmit="return resetPassword()">
+                <input pattern=".{6,}" id="password" type="text" value="Your new password" onfocus="this.value = '';"
+                    onblur="if (this.value == '') {this.value = 'Your new password';}">
+                <p> Please re-enter your new password</p>
+                <input id="confirmPassword" type="text" value="Confirm password" onfocus="this.value = '';"
+                    onblur="if (this.value == '') {this.value = 'Confirm password';}">
+                <input type="submit" value="Reset my Password">
+            </form>
+            <img src="images/cooking_with_crumbs_logo.png" Image Logo id="image_logo" width="200px" height="200px">
+        </div>
+    </div>
+    
 
 
+    <script>
+    function resetPassword() {
+  const newPassword = document.getElementById('password').value;
+  const Cpassword = document.getElementById('confirmPassword').value;
+  const hi = window.location.href;
+  const url = new URL(hi).searchParams;
+  const token = url.get('token');
+  if (newPassword !== Cpassword) {
+        alert('Passwords Must Match');
+  } else {
+        // eslint-disable-next-line no-undef
+        axios
+          .post(
+            'http://localhost:3000/resetpassword',
+            { token, newPassword },
+            { header: { 'Content-Type': 'appilcation/json' } },
+          )
+          .then((response) => {
+            alert(response.data);
+          });
+  }
+}
+    </script>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- <script type="text/javascript" src="../reset/reset.js"></script> -->
 </body>
 
 </html>

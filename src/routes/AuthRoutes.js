@@ -3,6 +3,7 @@ require('dotenv').config();
 const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
+const path = require('path');
 const { json } = require('body-parser');
 
 const User = mongoose.model('User');
@@ -86,10 +87,7 @@ router.put('/forgotpassword', async (req, res) => {
   });
 });
 router.get('/resetpassword', async (req, res) => {
-  // console.log(req.query.token);
-  res.send(
-    '<!DOCTYPE html>\n<html>\n    <head>\n    </head>\n <body>\n      <h1>Hello World!</h1>\n   </body>\n</html>'
-  );
+  res.sendFile(path.join(`${__dirname}/../reset/index.html`));
 });
 
 router.post('/resetpassword', async (req, res) => {

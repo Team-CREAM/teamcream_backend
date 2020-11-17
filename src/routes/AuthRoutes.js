@@ -48,6 +48,9 @@ router.put('/forgotpassword', async (req, res) => {
   console.log(email);
   await User.findOne({ email }, (err, user) => {
     if (!user || err) {
+      
+      console.log(user);
+      console.log(err);
       return res.json({ error: 'User with this email does not exist' });
     }
     const token = jwt.sign({ userId: user._id }, 'GARY_IS_LOVE', {
@@ -84,9 +87,11 @@ router.put('/forgotpassword', async (req, res) => {
     });
   });
 });
-
 router.get('/resetpassword', async (req, res) => {
-  res.sendFile(path.join(`${__dirname}/../reset/index.html`));
+  // console.log(req.query.token);
+  res.send(
+    '<!DOCTYPE html>\n<html>\n    <head>\n    </head>\n <body>\n      <h1>Hello World!</h1>\n   </body>\n</html>',
+  );
 });
 
 router.post('/resetpassword', async (req, res) => {
@@ -99,7 +104,7 @@ router.post('/resetpassword', async (req, res) => {
       if (err) {
         return res.json({ err: 'User does not exist' });
       }
-      console.log(newPassword);
+      // console.log(newPassword);
       // user.updateOne({ password: newPassword, resetLink: '' });
       user.password = newPassword;
       user.resetLink = '';

@@ -87,7 +87,6 @@ router.put('/forgotpassword', async (req, res) => {
   });
 });
 router.get('/resetpassword', async (req, res) => {
-  console.log('hello guys');
   res.sendFile(path.join(`${__dirname}/../reset/index.html`));
 });
 

@@ -1,5 +1,5 @@
-Markup : # Team_Cream #
-# teamcream_frontend
+# Team_Cream #
+## teamcream_backend ##
 **Before Starting Assignment:**
 * Make sure to pull any updated changes from the master. A good tip is to always pull from the master and resolve any merge conflicts.
 * Then, create another branch using “git checkout -b your_name_branch” only if a branch without this name has been created. Note: the -b option creates a new branch.

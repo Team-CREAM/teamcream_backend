@@ -9,7 +9,8 @@
         "airbnb-base"
     ],
     "plugins": [
-        "prettier"
+        "prettier",
+        "html"
     ],
     "parserOptions": {
         "ecmaVersion": 12
@@ -23,10 +24,11 @@
         "no-unused-vars": 0,
         "no-console": 0,
         "linebreak-style": 0,
-        "no-param-reassign": 0,
         "no-multi-spaces": 0,
         "operator-linebreak": 0,
         "func-names": 0,
+        "max-len": 0,
+        "no-alert":0,
         "prettier/prettier": [
             "error",
             {
@@ -34,7 +36,8 @@
               "singleQuote": true,
               "printWidth": 80,
               "semi": true,
-              "endOfLine": "auto"
+              "endOfLine": "auto",
+              "tabWith": 4
             }
           ]
     }

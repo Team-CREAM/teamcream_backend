@@ -1,0 +1,59 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>Password reset Success</title>
+    <link href="reset.css" rel="stylesheet" type="text/css" media="all" />
+    <meta name="keywords"
+        content="Reset Password Form Responsive, Login form web template, Sign up Web Templates, Flat Web Templates, Login signup Responsive web template, Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, SonyEricsson, Motorola web design" />
+    <link href='//fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900' rel='stylesheet' type='text/css'>
+    <img src="images/output-onlinepngtools.png\" Image Logo id="image_logo" width="200px" height="200px">
+
+</head>
+
+<body>
+    <div class="elelment">
+        <div class="element-main" id="reset_form">
+            <h1>Team Crumbs</h1>
+            <p> Your Passowrd has been changed.</p>
+            <p>This is a confirmation that your password was changed at
+            <p id="time"></p>
+            <p id="date"></p>
+            </p>
+
+        </div>
+    </div>
+    <script>
+        let mid = 'am';
+        n = new Date();
+        y = n.getFullYear();
+        m = n.getMonth() + 1;
+        d = n.getDate();
+        h = n.getHours();
+        minute = n.getMinutes();
+
+        if (h == 0) {
+            h = 12;
+        }
+        else if (h >= 12) {
+            if (h == 12) {
+                h = 12
+                mid = 'pm';
+            }
+            else {
+                h = h % 12;
+                mid = 'pm';
+            }
+
+        }
+        if ((minute / 10) < 1) {
+            document.getElementById("time").innerHTML = h + ":" + "0" + minute + " " + mid;
+        }
+        else {
+            document.getElementById("time").innerHTML = h + ":" + minute + " " + mid;
+        }
+        document.getElementById("date").innerHTML = m + "/" + d + "/" + y;
+
+    </script>
+    <script src="reset.js"></script>
+</body>

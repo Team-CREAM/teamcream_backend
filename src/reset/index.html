@@ -10,6 +10,7 @@
     <meta name="keywords"
         content="Reset Password Form Responsive, Login form web template, Sign up Web Templates, Flat Web Templates, Login signup Responsive web template, Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, SonyEricsson, Motorola web design" />
     <link href='//fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900' rel='stylesheet' type='text/css'>
+    <img src="images/output-onlinepngtools.png" Image Logo id="image_logo" width="200px" height="200px">
 </head>
 
 
@@ -19,7 +20,7 @@
             <h1>Reset Password</h1>
             <p> Create a new password that is at least 6 characters long. A strong password is combination of letters,
                 numbers, and punctuation marks.</p>
-            <form onsubmit="return resetPassword()">
+            <form onsubmit="return resetPassword()" id="form1">
                 <input pattern=".{6,}" id="password" type="text" value="Your new password" onfocus="this.value = '';"
                     onblur="if (this.value == '') {this.value = 'Your new password';}">
                 <p> Please re-enter your new password</p>
@@ -27,36 +28,71 @@
                     onblur="if (this.value == '') {this.value = 'Confirm password';}">
                 <input type="submit" value="Reset my Password">
             </form>
-            <img src="images/cooking_with_crumbs_logo.png" Image Logo id="image_logo" width="200px" height="200px">
+
         </div>
     </div>
-    
+
 
 
     <script>
-    function resetPassword() {
-  const newPassword = document.getElementById('password').value;
-  const Cpassword = document.getElementById('confirmPassword').value;
-  const hi = window.location.href;
-  const url = new URL(hi).searchParams;
-  const token = url.get('token');
-  if (newPassword !== Cpassword) {
-        alert('Passwords Must Match');
-  } else {
-        // eslint-disable-next-line no-undef
-        axios
-          .post(
-            'http://localhost:3000/resetpassword',
-            { token, newPassword },
-            { header: { 'Content-Type': 'appilcation/json' } },
-          )
-          .then((response) => {
-            alert(response.data);
-          });
-  }
-}
-    </script>
+        async function resetPassword() {
+            let result = "sucess.html";
+            let data;
+            const newPassword = document.getElementById('password').value;
+            const Cpassword = document.getElementById('confirmPassword').value;
+            const hi = window.location.href;
+            const url = new URL(hi).searchParams;
+            const token = url.get('token');
+            if (newPassword !== Cpassword) {
+                alert('Passwords Must Match');
+                return false;
+            } else {
 
+
+                //eslint - disable - next - line no - undef
+                let data = await axios
+                    .post(
+                        'http://localhost:3000/resetpassword',
+                        { token, newPassword },
+                        { header: { 'Content-Type': 'application/json' } },
+                    )
+
+                    .then((response) => {
+                        if (response.data.err) {
+                            result = "failure.html";
+                            document.getElementById("form1").action = result;
+
+
+                        } else {
+                            document.getElementById("form1").action = result;
+
+                        }
+
+
+                    });
+                //document.getElementById("form1").action = "sucess.html";
+                // .catch((error) => {
+
+                //     console.log("axios failed");
+                // });
+
+            }
+
+        }
+
+    </script>
+    <script>
+        function successFaile(data) {
+            alert("hi");
+            if (data.data.err) {
+                document.getElementById("form1").action = "failure.html";
+            }
+            else {
+                document.getElementById("form1").action = "sucess.html";
+            }
+            return;
+        }
+    </script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <!-- <script type="text/javascript" src="../reset/reset.js"></script> -->
 </body>

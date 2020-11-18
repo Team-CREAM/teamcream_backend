@@ -6,7 +6,7 @@ nav.vertical ul li{	display:block;}
 nav.horizontal ul li{	display: inline-block;}
 img{max-width:100%;}
 
- body{
+body{
    font-size: 100%;
    font-family: 'Roboto', sans-serif;
    background-image: url(images/background.jpg.png);
@@ -21,9 +21,7 @@ a:hover {
   -o-transition: 0.5s all;
 }
 #image_logo{
-    
-    padding-left: 180%;
-    padding-top: 50%;
+
 }
 #reset_form{
     opacity: 1;

@@ -97,12 +97,10 @@ router.post('/resetpassword', async (req, res) => {
       return res.json({ err: 'Incorrect or expired token' });
     }
     await User.findOne({ resetLink: token }, (err, user) => {
-
       if (!user) {
-        console.log("failed");
         return res.json({ err: 'User does not exist' });
       }
-      console.log(newPassword);
+
       // user.updateOne({ password: newPassword, resetLink: '' });
       user.password = newPassword;
       user.resetLink = '';
@@ -110,7 +108,6 @@ router.post('/resetpassword', async (req, res) => {
       return res.json({ message: 'Success reset' });
     });
   });
-
 });
 
 router.get('/profile', async (req, res) => {

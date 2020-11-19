@@ -9,6 +9,8 @@ const requireAuth = require('./middlewares/requireAuth');
 
 // add imports to routes here
 const authRoutes = require('./routes/AuthRoutes');
+const userRoutes = require('./routes/UserRoutes');
+const inventoryRoutes = require('./routes/InventoryRoutes');
 
 const app = express();
 
@@ -22,6 +24,10 @@ app.use(bodyParser.json());
 
 // App use routes
 app.use(authRoutes);
+
+app.use(userRoutes);
+
+app.use(inventoryRoutes);
 
 const mongoUri =
   'mongodb+srv://cse110:gary@cwc.l4ds3.mongodb.net/<dbname>?retryWrites=true&w=majority';

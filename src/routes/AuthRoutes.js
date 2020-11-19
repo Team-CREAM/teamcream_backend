@@ -24,6 +24,7 @@ router.post('/signup', async (req, res) => {
     // res.send(error.message);
   }
 });
+
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -43,6 +44,7 @@ router.post('/login', async (req, res) => {
     return res.json({ error: 'Invalid pasword or email' });
   }
 });
+
 router.put('/forgotpassword', async (req, res) => {
   const { email } = req.body;
   console.log(email);
@@ -86,6 +88,7 @@ router.put('/forgotpassword', async (req, res) => {
     });
   });
 });
+
 router.get('/resetpassword', async (req, res) => {
   res.sendFile(path.join(`${__dirname}/../reset/index.html`));
 });
@@ -110,114 +113,19 @@ router.post('/resetpassword', async (req, res) => {
   return res.json({ message: 'Success reset' });
 });
 
-router.get('/profile', async (req, res) => {
-  const { token } = req.body;
-  jwt.verify(token, 'GARY_IS_LOVE', async (err, data) => {
-    if (err) {
-      return res.json({ err: 'Incorrect or expired token' });
-    }
+router.post('/google', async (req, res) => {
+  const { email } = req.body;
 
-    await User.findOne({ _id: data.userId }, (err, user) => {
-      if (err) {
-        console.log(data);
-        return res.json({ err: 'User does not exist' });
-      }
-      console.log(user);
-      res.send(user);
-    });
-  });
-});
+  try {
+    const password = Math.random().toString(36).substring(7);
+    const user = new User({ email, password });
+    await user.save();
 
-router.post('/icon', async (req, res) => {
-  const { token, icon } = req.body;
-
-  console.log(icon);
-  // console.log(newIcon);
-  jwt.verify(token, 'GARY_IS_LOVE', async (err, data) => {
-    if (err) {
-      return res.json({ err: 'Incorrect or expired token' });
-    }
-    await User.findOne({ _id: data.userId }, (err, user) => {
-      if (err) {
-        return res.json({ err: 'User does not exist' });
-      }
-      user.icon = icon;
-      user.save();
-    });
-  });
-  return res.json({ message: 'Success icon changed' });
-});
-
-router.post('/username', async (req, res) => {
-  const { token, username } = req.body;
-
-  jwt.verify(token, 'GARY_IS_LOVE', async (err, data) => {
-    if (err) {
-      return res.json({ err: 'Incorrect or expired token' });
-    }
-    await User.findOne({ _id: data.userId }, (err, user) => {
-      if (err) {
-        return res.json({ err: 'User does not exist' });
-      }
-      user.username = username;
-      user.save();
-    });
-  });
-  return res.json({ message: 'Success username changed' });
-});
-
-router.post('/inventory', async (req, res) => {
-  const { token, ingredient } = req.body;
-  // console.log(newIcon);
-  jwt.verify(token, 'GARY_IS_LOVE', async (err, data) => {
-    if (err) {
-      return res.json({ err: 'Incorrect or expired token' });
-    }
-    await User.findOne({ _id: data.userId }, (err, user) => {
-      if (err) {
-        return res.json({ err: 'User does not exist' });
-      }
-      user.inventory.push(ingredient);
-      user.save();
-    });
-  });
-  return res.json({ message: 'Success ingredient added' });
-});
-
-router.post('/recipe', async (req, res) => {
-  const { token, recipe } = req.body;
-  // console.log(newIcon);
-  jwt.verify(token, 'GARY_IS_LOVE', async (err, data) => {
-    if (err) {
-      return res.json({ err: 'Incorrect or expired token' });
-    }
-    await User.findOne({ _id: data.userId }, (err, user) => {
-      if (err) {
-        return res.json({ err: 'User does not exist' });
-      }
-      user.recipe.push(recipe);
-      user.save();
-    });
-  });
-  return res.json({ message: 'Success recipe changed' });
-});
-
-router.delete('/delete', async (req, res) => {
-  const { token } = req.body;
-  jwt.verify(token, 'GARY_IS_LOVE', async (err, data) => {
-    if (err) {
-      console.log('incorrect token');
-      return res.json({ err: 'Incorrect or expired token' });
-    }
-    await User.findOne({ _id: data.userId }, (err, user) => {
-      if (err) {
-        console.log('inside err: User doesnt exist');
-        return res.json({ err: 'User does not exist' });
-      }
-      console.log(user);
-      user.remove();
-    });
-  });
-  return res.json({ message: 'User Deleted' });
+    const token = jwt.sign({ userId: user._id }, 'GARY_IS_LOVE');
+    res.send({ token });
+  } catch (error) {
+    res.send({ error: 'Your email or password is incorrect' });
+    // res.send(error.message);
+  }
 });
 module.exports = router;

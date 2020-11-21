@@ -42,6 +42,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  recentRecipes: {
+    type: [Schema.Types.ObjectId],
+    ref: 'Recipes',
+    default: null,
+  },
 });
 
 // Before save happens

@@ -5,8 +5,16 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const { json } = require('body-parser');
+const { MongoClient } = require('mongodb');
 const requireAuth = require('../middlewares/requireAuth');
 
+const mongoUri =
+  'mongodb+srv://cse110:gary@cwc.l4ds3.mongodb.net/<dbname>?retryWrites=true&w=majority';
+
+MongoClient.connect(mongoUri, {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+});
 const router = express.Router();
 
 /**
@@ -40,5 +48,37 @@ router.post('/preferences', requireAuth, async (req, res) => {
 
   return res.json({ message: 'Success preference added' });
 });
+
+router.post('/addRecentRecipe', requireAuth, async (req, res) => {
+  const { recipe } = req.body;
+  if (req.user.recentRecipes.length > 20) {
+    req.user.recentRecipes.splice(19, 1);
+  }
+  req.user.recentRecipes.push(recipe);
+  req.user.save();
+
+  return res.json({ message: 'Success preference added' });
+});
+
+router.get('/recentRecipe', requireAuth, async (req, res) => {
+  res.send(req.user.recentRecipes);
+});
+
+router.get('/recentRecipe', requireAuth, async (req, res) => {
+  res.send(req.user.recentRecipes);
+});
+
+// router.get('/allIngredients', requireAuth, async (req, res) => {
+//   MongoClient.connect(mongoUri, (err, db) => {
+//     if (err) throw err;
+//     db.db('mydb')
+//       .collection('ingredients')
+//       .find()
+//       .toArray((err, data) => {
+//         if (data != null) response.send(data);
+//         db.close();
+//       });
+//   });
+// });
 
 module.exports = router;

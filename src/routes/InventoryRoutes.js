@@ -57,8 +57,13 @@ router.get('/savedRecipes', requireAuth, async (req, res) => {
  */
 router.post('/recipe', requireAuth, async (req, res) => {
   try {
-    const { recipes } = req.body;
-    req.user.recipe = recipes;
+    const { recipe, add } = req.body;
+    if (add) {
+      req.user.recipe.push(recipe);
+    } else {
+      const index = req.user.recipe.find((elem) => elem.id === recipe.id);
+      req.user.splice(index, 1);
+    }
     req.user.save();
     return res.json({ message: 'Success recipe added' });
   } catch (e) {
@@ -98,43 +103,6 @@ router.post('/recentRecipe', requireAuth, async (req, res) => {
   req.user.save();
 
   return res.json({ message: 'Success recent recipe added' });
-});
-
-/**
- * view user's recent recipe list
- */
-router.get('/recentRecipe', requireAuth, async (req, res) => {
-  try {
-    res.send(req.user.recentRecipes);
-  } catch (e) {
-    console.log(e);
-    return res.json({ message: 'Error recent recipes cannot be viewed' });
-  }
-});
-
-/**
- * view most popular recipes list
- */
-router.get('/popularRecipes', requireAuth, async (req, res) => {
-  const client = new MongoClient(mongoUri);
-  try {
-    await client.connect();
-
-    const cursor = await client
-      .db('<dbname>')
-      .collection('recipes')
-      .find()
-      .sort({
-        aggregateLikes: -1,
-      })
-      .limit(30);
-    const result = await cursor.toArray();
-    return res.send(result);
-  } catch (e) {
-    console.error(e);
-  } finally {
-    await client.close();
-  }
 });
 
 /**

@@ -52,6 +52,21 @@ router.post('/username', requireAuth, async (req, res) => {
 });
 
 /**
+ * update preferences - change from true to false or vice versa
+ */
+router.post('/preferences', requireAuth, async (req, res) => {
+  try {
+    const { preference } = req.body;
+    req.user.preferences = preference;
+    req.user.save();
+    return res.json({ message: 'Success preference added' });
+  } catch (e) {
+    console.log(e);
+    return res.json({ message: 'Error preferences cannot be updated' });
+  }
+});
+
+/**
  * delete user
  */
 router.delete('/delete', requireAuth, async (req, res) => {

@@ -21,20 +21,29 @@ const userSchema = new mongoose.Schema({
     default: '',
   },
   preferences: {
-    type: Schema.Types.ObjectId,
+    type: {},
     ref: 'Preferences',
+    default: {
+      vegan: true,
+      vegetarian: false,
+      dairyFree: true,
+      glutenFree: false,
+      keepMeSignedIn: false,
+      intolerables: false,
+      metric: false,
+    },
   },
   username: {
     type: String,
     default: '',
   },
   inventory: {
-    type: [Schema.Types.ObjectId],
+    type: [Number],
     ref: 'Ingredients',
     default: null,
   },
   recipe: {
-    type: [Schema.Types.ObjectId],
+    type: [Number],
     ref: 'Recipes',
     default: null,
   },
@@ -43,7 +52,7 @@ const userSchema = new mongoose.Schema({
     default: '',
   },
   recentRecipes: {
-    type: [Schema.Types.ObjectId],
+    type: [Number],
     ref: 'Recipes',
     default: null,
   },

@@ -124,71 +124,26 @@ router.get('/allIngredients', requireAuth, async (req, res) => {
   }
 });
 
-// // Returns the actual ingredient given the ingredient's object id.
-// async function getIngredient(objectID) {
-//   const client = new MongoClient(mongoUri);
-//   try {
-//     await client.connect();
+// Returns the actual ingredient given the ingredient's object id.
+async function getIngredient(id) {
+  const client = new MongoClient(mongoUri);
+  try {
+    await client.connect();
 
-//     const result = await client
-//       .db('<dbname>')
-//       .collection('ingredients')
-//       .findOne((elem) => elem === objectID);
-//     return result;
-//   } catch (e) {
-//     console.error(e);
-//   } finally {
-//     await client.close();
-//   }
-// }
-// // Returns a score of how well a user's inventory matches with a recipe.
-// function matchIngredients(recipeIngredients, inventory) {
-//   let i = 0;
-//   let count = 0;
-//   for (i = 0; i < inventory.length; i += 1) {
-//     if (recipeIngredients.includes(getIngredient(inventory[i]))) {
-//       count += 1;
-//     }
-//   }
-//   return count / inventory.length;
-// }
+    const result = await client
+      .db('<dbname>')
+      .collection('ingredients')
+      .findOne({ id });
+    return result;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await client.close();
+  }
+}
 
-// router.get('/possiblerecipes', requireAuth, async (req, res) => {
-//   // Get the ingredients from the object id
-//   // take the ingredients from the user's inventory and match it with a given recipe which will return a score
-//   // Add the scores to a list once the list is filled. Sort it and return the top 20.
-//   console.log(req.user.inventory);
-//   const returnRecipes = {};
-//   const client = new MongoClient(mongoUri);
-
-//   const cursor = await client
-//     .db('<dbname>')
-//     .collection('recipes')
-//     .find()
-//     .limit(30);
-//   const temp = await cursor.toArray();
-//   temp.array.forEach((element) => {
-//     const score = matchIngredients(
-//       element.extendedIngredients,
-//       req.user.inventory,
-//     );
-//     if (score in returnRecipes) {
-//       returnRecipes[score].push(element);
-//     } else {
-//       returnRecipes[score] = [element];
-//     }
-//   });
-//   const result = [];
-//   const scores = Object.keys(returnRecipes).array.sort();
-//   let num = 0;
-//   while (result.length < 20) {
-//     let i = 0;
-//     for (i = 0; i < returnRecipes[scores[num]].length; i += 1) {
-//       result.push(returnRecipes[scores[num]][i]);
-//     }
-//     num += 1;
-//   }
-//   res.send(req.user.inventory);
-// });
+router.get('/testIng', requireAuth, async (req, res) => {
+  res.send(await getIngredient(19165));
+});
 
 module.exports = router;

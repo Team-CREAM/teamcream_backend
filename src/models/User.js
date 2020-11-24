@@ -24,9 +24,9 @@ const userSchema = new mongoose.Schema({
     type: {},
     ref: 'Preferences',
     default: {
-      vegan: true,
+      vegan: false,
       vegetarian: false,
-      dairyFree: true,
+      dairyFree: false,
       glutenFree: false,
       keepMeSignedIn: false,
       intolerables: false,

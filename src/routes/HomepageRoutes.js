@@ -21,7 +21,7 @@ router.get('/profile', requireAuth, async (req, res) => {
   res.send(req.user);
 });
 
-async function getPopularRecipes() {
+async function getPopularRecipes(user) {
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
@@ -29,11 +29,16 @@ async function getPopularRecipes() {
     const cursor = await client
       .db('<dbname>')
       .collection('recipes')
-      .find()
+      .find({
+        vegan: user.preferences.vegan,
+        vegetarian: user.preferences.vegetarian,
+        dairyFree: user.preferences.dairyFree,
+        glutenFree: user.preferences.glutenFree,
+      })
       .sort({
         aggregateLikes: -1,
       })
-      .limit(30);
+      .limit(50);
     const result = await cursor.toArray();
     return result;
   } catch (e) {
@@ -53,16 +58,29 @@ function getRecentRecipes(user) {
   }
 }
 
-async function getRandomRecipes() {
+async function getRandomRecipes(filter, user) {
   try {
     const client = new MongoClient(mongoUri);
     await client.connect();
-
     const Recipe = await client.db('<dbname>').collection('recipes');
-    const count = await Recipe.find().count();
-    const myRecipes = await Recipe.find()
-      .skip(Math.floor(Math.random() * count - 20) + 1) // Start at a certain point in the Collection
-      .limit(20); // 20 recipes from the starting point.
+    if (filter) {
+      const myRecipes = await Recipe.aggregate([
+        {
+          $match: {
+            $and: [
+              { vegan: user.preferences.vegan },
+              { vegetarian: user.preferences.vegetarian },
+              { dairyFree: user.preferences.dairyFree },
+              { glutenFree: user.preferences.glutenFree },
+              { IngredientList: { $nin: user.preferences.intolerables } },
+            ],
+          },
+        },
+        { $sample: { size: 50 } },
+      ]);
+      return myRecipes.toArray();
+    }
+    const myRecipes = await Recipe.aggregate([{ $sample: { size: 50 } }]);
     return myRecipes.toArray();
   } catch (e) {
     console.log(e);
@@ -119,7 +137,8 @@ router.get('/recentRecipes', requireAuth, async (req, res) => {
  * "Welcome Back" section. Returns 20 random recipes from the data base
  */
 router.get('/randomRecipes', requireAuth, async (req, res) => {
-  res.send(await getRandomRecipes());
+  const { filter } = req.body;
+  res.send(await getRandomRecipes(filter, req.user));
 });
 
 /**

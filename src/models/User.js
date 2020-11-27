@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
       dairyFree: false,
       glutenFree: false,
       keepMeSignedIn: false,
-      intolerables: false,
+      intolerables: [],
       metric: false,
     },
   },

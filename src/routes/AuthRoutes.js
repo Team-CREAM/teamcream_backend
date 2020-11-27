@@ -117,12 +117,19 @@ router.post('/google', async (req, res) => {
   const { email } = req.body;
 
   try {
-    const password = Math.random().toString(36).substring(7);
-    const user = new User({ email, password });
-    await user.save();
+    await User.findOne({ email }, async (err, user) => {
+      if (user) {
+        const token = jwt.sign({ userId: user._id }, 'GARY_IS_LOVE');
+        res.send({ token });
+      } else {
+        const password = Math.random().toString(36).substring(7);
+        const user = new User({ email, password });
 
-    const token = jwt.sign({ userId: user._id }, 'GARY_IS_LOVE');
-    res.send({ token });
+        await user.save();
+        const token = jwt.sign({ userId: user._id }, 'GARY_IS_LOVE');
+        res.send({ token });
+      }
+    });
   } catch (error) {
     res.send({ error: 'Your email or password is incorrect' });
     // res.send(error.message);

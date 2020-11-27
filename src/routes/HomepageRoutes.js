@@ -21,20 +21,31 @@ router.get('/profile', requireAuth, async (req, res) => {
   res.send(req.user);
 });
 
-async function getPopularRecipes(user) {
+async function getPopularRecipes(filter, user) {
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
-
+    if (filter) {
+      const cursor = await client
+        .db('<dbname>')
+        .collection('recipes')
+        .find({
+          vegan: user.preferences.vegan,
+          vegetarian: user.preferences.vegetarian,
+          dairyFree: user.preferences.dairyFree,
+          glutenFree: user.preferences.glutenFree,
+        })
+        .sort({
+          aggregateLikes: -1,
+        })
+        .limit(50);
+      const result = await cursor.toArray();
+      return result;
+    }
     const cursor = await client
       .db('<dbname>')
       .collection('recipes')
-      .find({
-        vegan: user.preferences.vegan,
-        vegetarian: user.preferences.vegetarian,
-        dairyFree: user.preferences.dairyFree,
-        glutenFree: user.preferences.glutenFree,
-      })
+      .find()
       .sort({
         aggregateLikes: -1,
       })
@@ -111,10 +122,11 @@ async function getPossibleRecipes(user) {
  */
 
 router.get('/home', requireAuth, async (req, res) => {
+  const { filter } = req.body;
   res.send({
-    popular_recipes: await getPopularRecipes(),
+    popular_recipes: await getPopularRecipes(filter, req.user),
     recent_recipes: getRecentRecipes(req.user),
-    random_recipes: await getRandomRecipes(),
+    random_recipes: await getRandomRecipes(filter, req.user),
     possible_recipes: await getPossibleRecipes(req.user),
   });
 });
@@ -123,7 +135,8 @@ router.get('/home', requireAuth, async (req, res) => {
  * view most popular recipes list
  */
 router.get('/popularRecipes', requireAuth, async (req, res) => {
-  res.send(await getPopularRecipes());
+  const { filter } = req.body;
+  res.send(await getPopularRecipes(filter, req.user));
 });
 
 /**

@@ -56,8 +56,8 @@ router.post('/username', requireAuth, async (req, res) => {
  */
 router.post('/preferences', requireAuth, async (req, res) => {
   try {
-    const { preference } = req.body;
-    req.user.preferences = preference;
+    const { preferences } = req.body;
+    req.user.preferences = preferences;
     req.user.save();
     return res.json({ message: 'Success preference added' });
   } catch (e) {

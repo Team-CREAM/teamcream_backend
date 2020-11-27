@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema({
     default: null,
   },
   recipe: {
-    type: [Number],
+    type: [String],
     ref: 'Recipes',
     default: null,
   },
@@ -52,7 +52,7 @@ const userSchema = new mongoose.Schema({
     default: '',
   },
   recentRecipes: {
-    type: [Number],
+    type: [String],
     ref: 'Recipes',
     default: null,
   },

@@ -6,12 +6,83 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const { json } = require('body-parser');
 const { MongoClient } = require('mongodb');
+// eslint-disable-next-line prefer-destructuring
+const ObjectID = require('mongodb').ObjectID;
 const requireAuth = require('../middlewares/requireAuth');
 
 const mongoUri =
   'mongodb+srv://cse110:gary@cwc.l4ds3.mongodb.net/<dbname>?retryWrites=true&w=majority';
 
 const router = express.Router();
+
+/**
+ * Returns the actual ingredient given the ingredient's id.
+ */
+async function getIngredient(id) {
+  const client = new MongoClient(mongoUri);
+  try {
+    await client.connect();
+
+    const result = await client
+      .db('<dbname>')
+      .collection('ingredients')
+      .findOne({ id });
+    return result;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await client.close();
+  }
+}
+
+/**
+ * Returns the actual recipe given the recipe's object id.
+ */
+async function getRecipe(objectID) {
+  const client = new MongoClient(mongoUri);
+  try {
+    await client.connect();
+
+    const result = await client
+      .db('<dbname>')
+      .collection('recipes')
+      .findOne({ _id: new ObjectID(objectID) });
+    return result;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await client.close();
+  }
+}
+
+/**
+ * Add recipe to user's recent recipe attribute
+ */
+async function addRecentRecipe(user, recipe) {
+  if (user.recentRecipes.includes(recipe)) {
+    const index = user.recentRecipes.indexOf(recipe);
+    user.recentRecipes.splice(index, 1);
+  }
+  if (user.recentRecipes.length > 20) {
+    user.recentRecipes.splice(19, 1);
+  }
+  user.recentRecipes.splice(0, 0, recipe);
+  user.save();
+}
+
+/**
+ * Returns the number of ingredients user currently has in their inventory that are used in the recipe
+ */
+function getIngredientsInRecipe(user, recipeObj) {
+  const ingredList = [];
+  recipeObj.extendedIngredients.forEach((element) => {
+    ingredList.push(element.id);
+  });
+
+  const numIng = ingredList.filter((value) => user.inventory.includes(value))
+    .length;
+  return numIng;
+}
 
 /**
  * view inventory
@@ -45,7 +116,18 @@ router.post('/inventory', requireAuth, async (req, res) => {
  */
 router.get('/savedRecipes', requireAuth, async (req, res) => {
   try {
-    return res.send(req.user.recipe);
+    let i;
+    const result = [];
+    for (i = 0; i < req.user.recipe.length; i++) {
+      const newObj = {};
+      newObj.recipe = req.user.recipe[i];
+      newObj.count = getIngredientsInRecipe(
+        req.user,
+        await getRecipe(req.user.recipe[i]),
+      );
+      result.push(newObj);
+    }
+    return res.send(result);
   } catch (e) {
     console.log(e);
     return res.json({ message: 'Error inventory cannot be viewed' });
@@ -55,14 +137,22 @@ router.get('/savedRecipes', requireAuth, async (req, res) => {
 /**
  * update saved recipes - add, delete
  */
-router.post('/recipe', requireAuth, async (req, res) => {
+router.post('/savedRecipes', requireAuth, async (req, res) => {
   try {
     const { recipe, add } = req.body;
     if (add) {
+      if (req.user.recipe.includes(recipe)) {
+        const index = req.user.recipe.indexOf(recipe);
+        req.user.recipe.splice(index, 1);
+      }
       req.user.recipe.push(recipe);
     } else {
-      const index = req.user.recipe.find((elem) => elem.id === recipe.id);
-      req.user.splice(index, 1);
+      console.log(typeof req.user.recipe[0]);
+      const index = req.user.recipe.indexOf(
+        req.user.recipe.find((elem) => elem === recipe),
+      );
+      console.log(index);
+      req.user.recipe.splice(index, 1);
     }
     req.user.save();
     return res.json({ message: 'Success recipe added' });
@@ -73,21 +163,24 @@ router.post('/recipe', requireAuth, async (req, res) => {
 });
 
 /**
- * add recipe to user's recent recipe list
+ * Given recipe objID returns entire recipe object,
+ * adds to user's recent recipes attrib, returns
+ * number of ingredients user currently has needed for recipe
  */
-router.post('/recentRecipe', requireAuth, async (req, res) => {
-  const { recipe } = req.body;
-  if (req.user.recentRecipes.includes(recipe)) {
-    const index = req.user.recentRecipes.indexOf(recipe);
-    req.user.recentRecipes.splice(index, 1);
+router.post('/recipeClicked', requireAuth, async (req, res) => {
+  try {
+    const { recipe } = req.body;
+    await addRecentRecipe(req.user, recipe);
+    const recipeObj = await getRecipe(recipe);
+    const numIng = getIngredientsInRecipe(req.user, recipeObj);
+    return res.send({
+      Recipe: recipeObj,
+      Ingredients: numIng,
+    });
+  } catch (e) {
+    console.log(e);
+    res.json({ message: 'error' });
   }
-  if (req.user.recentRecipes.length > 20) {
-    req.user.recentRecipes.splice(19, 1);
-  }
-  req.user.recentRecipes.splice(0, 0, recipe);
-  req.user.save();
-
-  return res.json({ message: 'Success recent recipe added' });
 });
 
 /**
@@ -98,7 +191,6 @@ router.get('/allIngredients', requireAuth, async (req, res) => {
   try {
     // Connect to the MongoDB cluster
     await client.connect();
-
     const cursor = await client.db('<dbname>').collection('ingredients').find();
     const result = await cursor.toArray();
     return res.send(result);
@@ -109,26 +201,21 @@ router.get('/allIngredients', requireAuth, async (req, res) => {
   }
 });
 
-// Returns the actual ingredient given the ingredient's object id.
-async function getIngredient(id) {
+/**
+ * view all recipes from database
+ */
+router.get('/allRecipes', requireAuth, async (req, res) => {
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
-
-    const result = await client
-      .db('<dbname>')
-      .collection('ingredients')
-      .findOne({ id });
-    return result;
+    const cursor = await client.db('<dbname>').collection('recipes').find();
+    const result = await cursor.toArray();
+    return res.send(result);
   } catch (e) {
     console.error(e);
   } finally {
     await client.close();
   }
-}
-
-router.get('/testIng', requireAuth, async (req, res) => {
-  res.send(await getIngredient(19165));
 });
 
 module.exports = router;

@@ -11,6 +11,8 @@ const requireAuth = require('../middlewares/requireAuth');
 const mongoUri =
   'mongodb+srv://cse110:gary@cwc.l4ds3.mongodb.net/<dbname>?retryWrites=true&w=majority';
 const router = express.Router();
+const Recipe = mongoose.model('Recipe');
+const Ingredient = mongoose.model('Ingredient');
 
 /**
  * return user profile (look at user schema for what will be returned)
@@ -68,17 +70,37 @@ async function getRandomRecipes() {
   }
 }
 
+async function getPossibleRecipes(user) {
+  try {
+    const client = new MongoClient(mongoUri);
+    await client.connect();
+    const Recipe = client.db('<dbname>').collection('recipes');
+    const cursor = Recipe.find({
+      IngredientList: { $not: { $elemMatch: { $nin: user.inventory } } },
+    });
+    const result = await cursor.toArray();
+    return result;
+  } catch (e) {
+    console.log(e);
+    return JSON.parse({
+      message: 'Error what you can make right now cannot be viewed',
+    });
+  }
+}
+
 /**
  * view all homepage items
  */
 
 router.get('/home', requireAuth, async (req, res) => {
   res.send({
-    'popular recipes': await getPopularRecipes(),
-    'recent recipes': getRecentRecipes(req.user),
-    'random recipes': await getRandomRecipes(),
+    popular_recipes: await getPopularRecipes(),
+    recent_recipes: getRecentRecipes(req.user),
+    random_recipes: await getRandomRecipes(),
+    possible_recipes: await getPossibleRecipes(req.user),
   });
 });
+
 /**
  * view most popular recipes list
  */
@@ -89,14 +111,22 @@ router.get('/popularRecipes', requireAuth, async (req, res) => {
 /**
  * view user's recent recipe list
  */
-router.get('/recentRecipe', requireAuth, async (req, res) => {
+router.get('/recentRecipes', requireAuth, async (req, res) => {
   res.send(getRecentRecipes(req.user));
 });
 
 /**
  * "Welcome Back" section. Returns 20 random recipes from the data base
  */
-router.get('/welcomeback', requireAuth, async (req, res) => {
+router.get('/randomRecipes', requireAuth, async (req, res) => {
   res.send(await getRandomRecipes());
 });
+
+/**
+ * Returns recipes depending on the user's ingredient inventory.
+ */
+router.get('/possiblerecipes', requireAuth, async (req, res) => {
+  res.send(await getPossibleRecipes(req.user));
+});
+
 module.exports = router;

@@ -173,29 +173,19 @@ router.post('/recipeClicked', requireAuth, async (req, res) => {
     await addRecentRecipe(req.user, recipe);
     const recipeObj = await getRecipe(recipe);
     const numIng = getIngredientsInRecipe(req.user, recipeObj);
+    let saved = false;
+    if (req.user.recipe.includes(recipe)) {
+      saved = true;
+    }
     return res.send({
       Recipe: recipeObj,
       Ingredients: numIng,
+      saved,
     });
   } catch (e) {
     console.log(e);
     res.json({ message: 'error' });
   }
-});
-
-/**
- * view recipes object given objectId
- */
-router.get('/recipe', requireAuth, async (req, res) => {
-  const { objectId } = req.body;
-  let saved = false;
-  if (req.user.recipe.includes(objectId)) {
-    saved = true;
-  }
-  res.send({
-    recipe: await getRecipe(objectId),
-    saved,
-  });
 });
 
 /**

@@ -30,10 +30,28 @@ async function getPopularRecipes(filter, user) {
         .db('<dbname>')
         .collection('recipes')
         .find({
-          vegan: user.preferences.vegan,
-          vegetarian: user.preferences.vegetarian,
-          dairyFree: user.preferences.dairyFree,
-          glutenFree: user.preferences.glutenFree,
+          $and: [
+            { $or: [{ vegan: user.preferences.vegan }, { vegan: true }] },
+            {
+              $or: [
+                { vegetarian: user.preferences.vegetarian },
+                { vegetarian: true },
+              ],
+            },
+            {
+              $or: [
+                { dairyFree: user.preferences.dairyFree },
+                { dairyFree: true },
+              ],
+            },
+            {
+              $or: [
+                { glutenFree: user.preferences.glutenFree },
+                { glutenFree: true },
+              ],
+            },
+            { IngredientList: { $nin: user.preferences.intolerables } },
+          ],
         })
         .sort({
           aggregateLikes: -1,
@@ -79,10 +97,25 @@ async function getRandomRecipes(filter, user) {
         {
           $match: {
             $and: [
-              { vegan: user.preferences.vegan },
-              { vegetarian: user.preferences.vegetarian },
-              { dairyFree: user.preferences.dairyFree },
-              { glutenFree: user.preferences.glutenFree },
+              { $or: [{ vegan: user.preferences.vegan }, { vegan: true }] },
+              {
+                $or: [
+                  { vegetarian: user.preferences.vegetarian },
+                  { vegetarian: true },
+                ],
+              },
+              {
+                $or: [
+                  { dairyFree: user.preferences.dairyFree },
+                  { dairyFree: true },
+                ],
+              },
+              {
+                $or: [
+                  { glutenFree: user.preferences.glutenFree },
+                  { glutenFree: true },
+                ],
+              },
               { IngredientList: { $nin: user.preferences.intolerables } },
             ],
           },

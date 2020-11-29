@@ -184,6 +184,14 @@ router.post('/recipeClicked', requireAuth, async (req, res) => {
 });
 
 /**
+ * view recipes object given objectId
+ */
+router.get('/recipes', requireAuth, async (req, res) => {
+  const { objectId } = req.body;
+  res.send(await getRecipe(objectId));
+});
+
+/**
  * view all ingredients from database
  */
 router.get('/allIngredients', requireAuth, async (req, res) => {

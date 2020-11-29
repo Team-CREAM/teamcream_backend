@@ -186,9 +186,16 @@ router.post('/recipeClicked', requireAuth, async (req, res) => {
 /**
  * view recipes object given objectId
  */
-router.get('/recipes', requireAuth, async (req, res) => {
+router.get('/recipe', requireAuth, async (req, res) => {
   const { objectId } = req.body;
-  res.send(await getRecipe(objectId));
+  let saved = false;
+  if (req.user.recipe.includes(objectId)) {
+    saved = true;
+  }
+  res.send({
+    recipe: await getRecipe(objectId),
+    saved,
+  });
 });
 
 /**

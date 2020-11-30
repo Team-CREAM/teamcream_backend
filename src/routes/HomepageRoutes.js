@@ -31,25 +31,10 @@ async function getPopularRecipes(filter, user) {
         .collection('recipes')
         .find({
           $and: [
-            { $or: [{ vegan: user.preferences.vegan }, { vegan: true }] },
-            {
-              $or: [
-                { vegetarian: user.preferences.vegetarian },
-                { vegetarian: true },
-              ],
-            },
-            {
-              $or: [
-                { dairyFree: user.preferences.dairyFree },
-                { dairyFree: true },
-              ],
-            },
-            {
-              $or: [
-                { glutenFree: user.preferences.glutenFree },
-                { glutenFree: true },
-              ],
-            },
+            { vegan: { $in: [user.preferences.vegan, true] } },
+            { vegetarian: { $in: [user.preferences.vegetarian, true] } },
+            { dairyFree: { $in: [user.preferences.dairyFree, true] } },
+            { glutenFree: { $in: [user.preferences.glutenFree, true] } },
             { IngredientList: { $nin: user.preferences.intolerables } },
           ],
         })
@@ -97,25 +82,10 @@ async function getRandomRecipes(filter, user) {
         {
           $match: {
             $and: [
-              { $or: [{ vegan: user.preferences.vegan }, { vegan: true }] },
-              {
-                $or: [
-                  { vegetarian: user.preferences.vegetarian },
-                  { vegetarian: true },
-                ],
-              },
-              {
-                $or: [
-                  { dairyFree: user.preferences.dairyFree },
-                  { dairyFree: true },
-                ],
-              },
-              {
-                $or: [
-                  { glutenFree: user.preferences.glutenFree },
-                  { glutenFree: true },
-                ],
-              },
+              { vegan: { $in: [user.preferences.vegan, true] } },
+              { vegetarian: { $in: [user.preferences.vegetarian, true] } },
+              { dairyFree: { $in: [user.preferences.dairyFree, true] } },
+              { glutenFree: { $in: [user.preferences.glutenFree, true] } },
               { IngredientList: { $nin: user.preferences.intolerables } },
             ],
           },

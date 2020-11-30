@@ -12,6 +12,7 @@ const authRoutes = require('./routes/AuthRoutes');
 const userRoutes = require('./routes/UserRoutes');
 const inventoryRoutes = require('./routes/InventoryRoutes');
 const homepageRoutes = require('./routes/HomepageRoutes');
+const exploreRoute = require('./routes/ExploreRoute');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use(userRoutes);
 
 app.use(inventoryRoutes);
 app.use(homepageRoutes);
+app.use(exploreRoute);
 
 const mongoUri =
   'mongodb+srv://cse110:gary@cwc.l4ds3.mongodb.net/<dbname>?retryWrites=true&w=majority';

@@ -190,7 +190,7 @@ router.get('/home', requireAuth, async (req, res) => {
   const { filter } = req.body;
   res.send({
     popular_recipes: await getPopularRecipes(filter, req.user),
-    recent_recipes: getRecentRecipes(req.user),
+    recent_recipes: await getRecentRecipes(req.user),
     random_recipes: await getRandomRecipes(filter, req.user),
     possible_recipes: await getPossibleRecipes(req.user),
   });

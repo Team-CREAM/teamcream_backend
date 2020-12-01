@@ -15,6 +15,7 @@ const homepageRoutes = require('./routes/HomepageRoutes');
 const exploreRoute = require('./routes/ExploreRoute');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(express.static(`${__dirname}/reset`));
 // app.get('/resetpassword', (req, res) => {
@@ -52,6 +53,6 @@ app.get('/', requireAuth, (req, res) => {
   res.send(req.user);
 });
 
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log('Listening on port 3000');
 });

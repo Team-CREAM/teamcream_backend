@@ -146,16 +146,33 @@ router.post('/savedRecipes', requireAuth, async (req, res) => {
         req.user.recipe.splice(index, 1);
       }
       req.user.recipe.push(recipe);
-    } else {
+    } else if (req.user.recipe.includes(recipe)) {
       console.log(typeof req.user.recipe[0]);
       const index = req.user.recipe.indexOf(
         req.user.recipe.find((elem) => elem === recipe),
       );
       console.log(index);
       req.user.recipe.splice(index, 1);
+    } else {
+      console.log('damn.');
     }
-    req.user.save();
-    return res.json({ message: 'Success recipe added' });
+    const user = await req.user.save();
+    console.log(user);
+    let i;
+    const result = [];
+    for (i = 0; i < req.user.recipe.length; i++) {
+      const newObj = {};
+      newObj.recipe = req.user.recipe[i];
+      newObj.count = getIngredientsInRecipe(
+        req.user,
+        await getRecipe(req.user.recipe[i]),
+      );
+      result.push(newObj);
+    }
+    if (add) {
+      return res.json({ message: 'Success recipe added', result });
+    }
+    return res.json({ message: 'Success recipe removed', result });
   } catch (e) {
     console.log(e);
     return res.json({ message: 'Error saved recipe cannot be updated' });

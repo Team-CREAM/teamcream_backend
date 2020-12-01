@@ -6,13 +6,13 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const { json } = require('body-parser');
 const { MongoClient } = require('mongodb');
+// eslint-disable-next-line prefer-destructuring
+const ObjectID = require('mongodb').ObjectID;
 const requireAuth = require('../middlewares/requireAuth');
 
 const mongoUri =
   'mongodb+srv://cse110:gary@cwc.l4ds3.mongodb.net/<dbname>?retryWrites=true&w=majority';
 const router = express.Router();
-const Recipe = mongoose.model('Recipe');
-const Ingredient = mongoose.model('Ingredient');
 
 /**
  * return user profile (look at user schema for what will be returned)
@@ -20,6 +20,43 @@ const Ingredient = mongoose.model('Ingredient');
 router.get('/profile', requireAuth, async (req, res) => {
   res.send(req.user);
 });
+
+/**
+ * Returns the actual recipe given the recipe's object id.
+ */
+async function getRecipe(objectID) {
+  const client = new MongoClient(mongoUri);
+  try {
+    await client.connect();
+
+    const result = await client
+      .db('<dbname>')
+      .collection('recipes')
+      .findOne({ _id: new ObjectID(objectID) });
+    return result;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await client.close();
+  }
+}
+
+async function getRecentRecipes(user) {
+  try {
+    const temp = user.recentRecipes;
+    const result = await temp.map(async (elem) => {
+      const recipeObj = await getRecipe(elem);
+      if (user.recipe.includes(elem)) {
+        return { recipe: recipeObj, saved: true };
+      }
+      return { recipe: recipeObj, saved: false };
+    });
+    return await Promise.all(result);
+  } catch (e) {
+    console.log(e);
+    return JSON.parse({ message: 'Error recent recipes cannot be viewed' });
+  }
+}
 
 async function getPopularRecipes(filter, user) {
   const client = new MongoClient(mongoUri);
@@ -53,7 +90,15 @@ async function getPopularRecipes(filter, user) {
         aggregateLikes: -1,
       })
       .limit(50);
-    const result = await cursor.toArray();
+    const temp = await cursor.toArray();
+    const result = [];
+    temp.forEach((elem) => {
+      if (user.recipe.includes(elem._id)) {
+        result.push({ recipe: elem, saved: true });
+      } else {
+        result.push({ recipe: elem, saved: false });
+      }
+    });
     return result;
   } catch (e) {
     console.error(e);
@@ -63,22 +108,13 @@ async function getPopularRecipes(filter, user) {
   }
 }
 
-function getRecentRecipes(user) {
-  try {
-    return user.recentRecipes;
-  } catch (e) {
-    console.log(e);
-    return JSON.parse({ message: 'Error recent recipes cannot be viewed' });
-  }
-}
-
 async function getRandomRecipes(filter, user) {
   try {
     const client = new MongoClient(mongoUri);
     await client.connect();
     const Recipe = await client.db('<dbname>').collection('recipes');
     if (filter) {
-      const myRecipes = await Recipe.aggregate([
+      const cursor = await Recipe.aggregate([
         {
           $match: {
             $and: [
@@ -92,10 +128,28 @@ async function getRandomRecipes(filter, user) {
         },
         { $sample: { size: 50 } },
       ]);
-      return myRecipes.toArray();
+      const temp = await cursor.toArray();
+      const result = [];
+      temp.forEach((elem) => {
+        if (user.recipe.includes(elem._id)) {
+          result.push({ recipe: getRecipe, saved: true });
+        } else {
+          result.push({ recipe: elem, saved: false });
+        }
+      });
+      return result;
     }
-    const myRecipes = await Recipe.aggregate([{ $sample: { size: 50 } }]);
-    return myRecipes.toArray();
+    const cursor = await Recipe.aggregate([{ $sample: { size: 50 } }]);
+    const temp = await cursor.toArray();
+    const result = [];
+    temp.forEach((elem) => {
+      if (user.recipe.includes(elem._id)) {
+        result.push({ recipe: elem, saved: true });
+      } else {
+        result.push({ recipe: elem, saved: false });
+      }
+    });
+    return result;
   } catch (e) {
     console.log(e);
     return JSON.parse({ message: 'Error random recipes cannot be viewed' });
@@ -110,7 +164,15 @@ async function getPossibleRecipes(user) {
     const cursor = Recipe.find({
       IngredientList: { $not: { $elemMatch: { $nin: user.inventory } } },
     });
-    const result = await cursor.toArray();
+    const temp = await cursor.toArray();
+    const result = [];
+    temp.forEach((elem) => {
+      if (user.recipe.includes(elem._id)) {
+        result.push({ recipe: elem, saved: true });
+      } else {
+        result.push({ recipe: elem, saved: false });
+      }
+    });
     return result;
   } catch (e) {
     console.log(e);
@@ -146,7 +208,7 @@ router.get('/popularRecipes', requireAuth, async (req, res) => {
  * view user's recent recipe list
  */
 router.get('/recentRecipes', requireAuth, async (req, res) => {
-  res.send(getRecentRecipes(req.user));
+  res.send(await getRecentRecipes(req.user));
 });
 
 /**

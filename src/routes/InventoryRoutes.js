@@ -105,17 +105,8 @@ function getIngredientsInRecipe(user, recipeObj) {
 }
 
 /**
- * view inventory
+ * update the inventory with new ingredients
  */
-router.get('/inventory', requireAuth, async (req, res) => {
-  try {
-    return res.send(req.user.inventory);
-  } catch (e) {
-    console.log(e);
-    return res.json({ message: 'Error inventory cannot be viewed' });
-  }
-});
-
 async function inventoryUpdate(ingredients, user) {
   const ingObjs = [];
   const newInventory = [];
@@ -129,6 +120,49 @@ async function inventoryUpdate(ingredients, user) {
   await user.save();
   return Promise.all(ingObjs);
 }
+
+/**
+ * change the number of likes on a recipe
+ */
+
+async function changeLikes(recipeId, add) {
+  const client = new MongoClient(mongoUri);
+  try {
+    await client.connect();
+
+    const Recipe = await client.db('<dbname>').collection('recipes');
+    let result;
+    if (add) {
+      result = await Recipe.updateOne(
+        { _id: new ObjectID(recipeId) },
+        { $inc: { aggregateLikes: 1 } },
+      );
+    } else {
+      result = await Recipe.updateOne(
+        { _id: new ObjectID(recipeId) },
+        { $inc: { aggregateLikes: -1 } },
+      );
+    }
+    return result;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await client.close();
+  }
+}
+
+/**
+ * view inventory
+ */
+router.get('/inventory', requireAuth, async (req, res) => {
+  try {
+    return res.send(req.user.inventory);
+  } catch (e) {
+    console.log(e);
+    return res.json({ message: 'Error inventory cannot be viewed' });
+  }
+});
+
 /**
  * update inventory - add, delete
  */
@@ -171,24 +205,20 @@ router.get('/savedRecipes', requireAuth, async (req, res) => {
 router.post('/savedRecipes', requireAuth, async (req, res) => {
   try {
     const { recipe, add } = req.body;
+    await changeLikes(recipe, add);
     if (add) {
       if (req.user.recipe.includes(recipe)) {
         const index = req.user.recipe.indexOf(recipe);
         req.user.recipe.splice(index, 1);
       }
       req.user.recipe.push(recipe);
-    } else if (req.user.recipe.includes(recipe)) {
-      console.log(typeof req.user.recipe[0]);
+    } else {
       const index = req.user.recipe.indexOf(
         req.user.recipe.find((elem) => elem === recipe),
       );
-      console.log(index);
       req.user.recipe.splice(index, 1);
-    } else {
-      console.log('damn.');
     }
-    const user = await req.user.save();
-    console.log(user);
+    await req.user.save();
     let i;
     const result = [];
     for (i = 0; i < req.user.recipe.length; i++) {

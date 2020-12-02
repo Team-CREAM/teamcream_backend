@@ -122,6 +122,19 @@ async function inventoryUpdate(ingredients, user) {
 }
 
 /**
+ * update the inventory with new ingredients
+ */
+async function viewInventory(user) {
+  const ingObjs = [];
+  let i;
+  for (i = 0; i < user.inventory.length; i++) {
+    const ingObj = await getIngredient(user.inventory[i]);
+    ingObjs.push(await ingObj);
+  }
+  return Promise.all(ingObjs);
+}
+
+/**
  * change the number of likes on a recipe
  */
 
@@ -156,7 +169,8 @@ async function changeLikes(recipeId, add) {
  */
 router.get('/inventory', requireAuth, async (req, res) => {
   try {
-    return res.send(req.user.inventory);
+    console.log(req.user.inventory);
+    return res.send(await viewInventory(req.user));
   } catch (e) {
     console.log(e);
     return res.json({ message: 'Error inventory cannot be viewed' });

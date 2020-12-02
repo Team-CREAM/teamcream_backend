@@ -36,6 +36,26 @@ async function getIngredient(id) {
 }
 
 /**
+ * Returns the actual ingredient given the ingredient's id.
+ */
+async function getIngredientByName(name) {
+  const client = new MongoClient(mongoUri);
+  try {
+    await client.connect();
+
+    const result = await client
+      .db('<dbname>')
+      .collection('ingredients')
+      .findOne({ name });
+    return result;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await client.close();
+  }
+}
+
+/**
  * Returns the actual recipe given the recipe's object id.
  */
 async function getRecipe(objectID) {
@@ -96,15 +116,26 @@ router.get('/inventory', requireAuth, async (req, res) => {
   }
 });
 
+async function inventoryUpdate(ingredients, user) {
+  const ingObjs = [];
+  const newInventory = [];
+  let i;
+  for (i = 0; i < ingredients.length; i++) {
+    const ingObj = await getIngredientByName(ingredients[i]);
+    newInventory.push(await ingObj.id);
+    ingObjs.push(await ingObj);
+  }
+  user.inventory = await newInventory;
+  await user.save();
+  return Promise.all(ingObjs);
+}
 /**
  * update inventory - add, delete
  */
 router.post('/inventory', requireAuth, async (req, res) => {
   try {
     const { ingredients } = req.body;
-    req.user.inventory = ingredients;
-    req.user.save();
-    return res.json({ message: 'Success inventory updated' });
+    res.send(await inventoryUpdate(ingredients, req.user));
   } catch (e) {
     console.log(e);
     return res.json({ message: 'Error inventory cannot be updated' });

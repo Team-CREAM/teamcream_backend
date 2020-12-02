@@ -185,7 +185,7 @@ async function filterOff(user, body, Recipes) {
 /**
  * creates explore recipe page where filters all recipes based off of params
  */
-router.get('/explore', requireAuth, async (req, res) => {
+router.post('/explore', requireAuth, async (req, res) => {
   const {
     search,
     filter,

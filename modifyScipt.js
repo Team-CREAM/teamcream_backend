@@ -37,15 +37,26 @@ async function deleteNoImage() {
   const client = new MongoClient(mongoUri);
   await client.connect();
 
-  const Recipe = client.db('<dbname>').collection('tempRecipes');
+  const Recipe = client.db('<dbname>').collection('recipes');
   await Recipe.deleteMany({ image: '' });
   await client.close();
   return 'deleted';
 }
 
+async function deleteAllUsers() {
+  const client = new MongoClient(mongoUri);
+  await client.connect();
+
+  const user = client.db('<dbname>').collection('users');
+  await user.deleteMany({});
+  await client.close();
+  return 'deleted users';
+}
+
 async function main() {
-  console.log(await copyCollection());
+  // console.log(await copyCollection());
   console.log(await deleteNoImage());
+  console.log(await deleteAllUsers());
 }
 
 main();

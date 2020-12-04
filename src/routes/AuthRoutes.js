@@ -120,14 +120,14 @@ router.post('/google', async (req, res) => {
     await User.findOne({ email }, async (err, user) => {
       if (user) {
         const token = jwt.sign({ userId: user._id }, 'GARY_IS_LOVE');
-        res.send({ token });
+        res.send({ token, new: false });
       } else {
         const password = Math.random().toString(36).substring(7);
         const user = new User({ email, password });
 
         await user.save();
         const token = jwt.sign({ userId: user._id }, 'GARY_IS_LOVE');
-        res.send({ token });
+        res.send({ token, new: true });
       }
     });
   } catch (error) {

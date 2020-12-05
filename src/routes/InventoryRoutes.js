@@ -25,7 +25,7 @@ async function getIngredient(id) {
 
     const result = await client
       .db('<dbname>')
-      .collection('ingredients')
+      .collection('tempIngredients')
       .findOne({ id });
     return result;
   } catch (e) {
@@ -45,7 +45,7 @@ async function getIngredientByName(name) {
 
     const result = await client
       .db('<dbname>')
-      .collection('ingredients')
+      .collection('tempIngredients')
       .findOne({ name });
     return result;
   } catch (e) {
@@ -209,7 +209,7 @@ router.get('/savedRecipes', requireAuth, async (req, res) => {
     return res.send(result);
   } catch (e) {
     console.log(e);
-    return res.json({ message: 'Error inventory cannot be viewed' });
+    return res.json({ message: 'Error savedRecipes cannot be viewed' });
   }
 });
 
@@ -288,7 +288,10 @@ router.get('/allIngredients', requireAuth, async (req, res) => {
   try {
     // Connect to the MongoDB cluster
     await client.connect();
-    const cursor = await client.db('<dbname>').collection('ingredients').find();
+    const cursor = await client
+      .db('<dbname>')
+      .collection('tempIngredients')
+      .find();
     const result = await cursor.toArray();
     return res.send(result);
   } catch (e) {

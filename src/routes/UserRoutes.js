@@ -27,9 +27,11 @@ router.get('/profile', requireAuth, async (req, res) => {
 router.post('/icon', requireAuth, async (req, res) => {
   try {
     const { icon } = req.body;
-    req.user.icon = icon;
-    req.user.save();
-    return res.json({ message: 'Success icon changed' });
+    if (icon !== undefined) {
+      req.user.icon = icon;
+      req.user.save();
+    }
+    return res.json({ icon: req.user.icon });
   } catch (e) {
     console.log(e);
     res.send({ message: 'Error icon update failed' });

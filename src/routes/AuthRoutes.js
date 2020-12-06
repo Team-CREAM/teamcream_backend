@@ -14,14 +14,16 @@ router.post('/signup', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = new User({ email, password });
-    await user.save();
-
-    const token = jwt.sign({ userId: user._id }, 'GARY_IS_LOVE');
+    const user = await User.findOne({ email });
+    if (user) {
+      return res.json({ error: 'This email is already in use' });
+    }
+    const newUser = new User({ email, password });
+    await newUser.save();
+    const token = jwt.sign({ userId: newUser._id }, 'GARY_IS_LOVE');
     res.send({ token });
   } catch (error) {
-    res.send({ error: 'Your email or password is incorrect' });
-    // res.send(error.message);
+    res.send({ error: 'Your password does not meet the requirements' });
   }
 });
 

@@ -199,11 +199,11 @@ router.get('/savedRecipes', requireAuth, async (req, res) => {
     const result = [];
     for (i = 0; i < req.user.recipe.length; i++) {
       const newObj = {};
-      newObj.recipe = req.user.recipe[i];
-      newObj.count = getIngredientsInRecipe(
-        req.user,
-        await getRecipe(req.user.recipe[i]),
-      );
+      const recipe = await getRecipe(req.user.recipe[i]);
+      newObj.id = recipe._id;
+      newObj.title = recipe.title;
+      newObj.imageUrl = recipe.image;
+      newObj.count = getIngredientsInRecipe(req.user, recipe);
       result.push(newObj);
     }
     return res.send(result);

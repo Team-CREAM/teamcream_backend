@@ -65,15 +65,7 @@ async function getPopularRecipes(user) {
     const cursor = await client
       .db('<dbname>')
       .collection('recipes')
-      .find({
-        $and: [
-          { vegan: { $in: [user.preferences.vegan, true] } },
-          { vegetarian: { $in: [user.preferences.vegetarian, true] } },
-          { dairyFree: { $in: [user.preferences.dairyFree, true] } },
-          { glutenFree: { $in: [user.preferences.glutenFree, true] } },
-          { IngredientList: { $nin: user.preferences.intolerables } },
-        ],
-      })
+      .find({})
       .sort({
         aggregateLikes: -1,
       })

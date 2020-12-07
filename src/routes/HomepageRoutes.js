@@ -65,12 +65,30 @@ async function getPopularRecipes(user) {
     const cursor = await client
       .db('<dbname>')
       .collection('recipes')
-      .find({})
-      .sort({
-        aggregateLikes: -1,
-      })
-      .limit(50);
-    const result = await cursor.toArray();
+      .aggregate([
+        {
+          $match: {
+            $and: [
+              { vegan: { $in: [user.preferences.vegan, true] } },
+              { vegetarian: { $in: [user.preferences.vegetarian, true] } },
+              { dairyFree: { $in: [user.preferences.dairyFree, true] } },
+              { glutenFree: { $in: [user.preferences.glutenFree, true] } },
+              { IngredientList: { $nin: user.preferences.intolerables } },
+            ],
+          },
+        },
+        { $sort: { aggregateLikes: -1 } },
+        { $sample: { size: 50 } },
+      ]);
+    const temp = await cursor.toArray();
+    const result = [];
+    temp.forEach((elem) => {
+      if (user.recipe.includes(elem._id)) {
+        result.push({ recipe: getRecipe, saved: true });
+      } else {
+        result.push({ recipe: elem, saved: false });
+      }
+    });
     return result;
   } catch (e) {
     console.error(e);

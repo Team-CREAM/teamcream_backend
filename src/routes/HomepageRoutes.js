@@ -58,47 +58,27 @@ async function getRecentRecipes(user) {
   }
 }
 
-async function getPopularRecipes(filter, user) {
+async function getPopularRecipes(user) {
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
-    if (filter) {
-      const cursor = await client
-        .db('<dbname>')
-        .collection('recipes')
-        .find({
-          $and: [
-            { vegan: { $in: [user.preferences.vegan, true] } },
-            { vegetarian: { $in: [user.preferences.vegetarian, true] } },
-            { dairyFree: { $in: [user.preferences.dairyFree, true] } },
-            { glutenFree: { $in: [user.preferences.glutenFree, true] } },
-            { IngredientList: { $nin: user.preferences.intolerables } },
-          ],
-        })
-        .sort({
-          aggregateLikes: -1,
-        })
-        .limit(50);
-      const result = await cursor.toArray();
-      return result;
-    }
     const cursor = await client
       .db('<dbname>')
       .collection('recipes')
-      .find()
+      .find({
+        $and: [
+          { vegan: { $in: [user.preferences.vegan, true] } },
+          { vegetarian: { $in: [user.preferences.vegetarian, true] } },
+          { dairyFree: { $in: [user.preferences.dairyFree, true] } },
+          { glutenFree: { $in: [user.preferences.glutenFree, true] } },
+          { IngredientList: { $nin: user.preferences.intolerables } },
+        ],
+      })
       .sort({
         aggregateLikes: -1,
       })
       .limit(50);
-    const temp = await cursor.toArray();
-    const result = [];
-    temp.forEach((elem) => {
-      if (user.recipe.includes(elem._id)) {
-        result.push({ recipe: elem, saved: true });
-      } else {
-        result.push({ recipe: elem, saved: false });
-      }
-    });
+    const result = await cursor.toArray();
     return result;
   } catch (e) {
     console.error(e);
@@ -108,43 +88,30 @@ async function getPopularRecipes(filter, user) {
   }
 }
 
-async function getRandomRecipes(filter, user) {
+async function getRandomRecipes(user) {
   try {
     const client = new MongoClient(mongoUri);
     await client.connect();
     const Recipe = await client.db('<dbname>').collection('recipes');
-    if (filter) {
-      const cursor = await Recipe.aggregate([
-        {
-          $match: {
-            $and: [
-              { vegan: { $in: [user.preferences.vegan, true] } },
-              { vegetarian: { $in: [user.preferences.vegetarian, true] } },
-              { dairyFree: { $in: [user.preferences.dairyFree, true] } },
-              { glutenFree: { $in: [user.preferences.glutenFree, true] } },
-              { IngredientList: { $nin: user.preferences.intolerables } },
-            ],
-          },
+    const cursor = await Recipe.aggregate([
+      {
+        $match: {
+          $and: [
+            { vegan: { $in: [user.preferences.vegan, true] } },
+            { vegetarian: { $in: [user.preferences.vegetarian, true] } },
+            { dairyFree: { $in: [user.preferences.dairyFree, true] } },
+            { glutenFree: { $in: [user.preferences.glutenFree, true] } },
+            { IngredientList: { $nin: user.preferences.intolerables } },
+          ],
         },
-        { $sample: { size: 50 } },
-      ]);
-      const temp = await cursor.toArray();
-      const result = [];
-      temp.forEach((elem) => {
-        if (user.recipe.includes(elem._id)) {
-          result.push({ recipe: getRecipe, saved: true });
-        } else {
-          result.push({ recipe: elem, saved: false });
-        }
-      });
-      return result;
-    }
-    const cursor = await Recipe.aggregate([{ $sample: { size: 50 } }]);
+      },
+      { $sample: { size: 50 } },
+    ]);
     const temp = await cursor.toArray();
     const result = [];
     temp.forEach((elem) => {
       if (user.recipe.includes(elem._id)) {
-        result.push({ recipe: elem, saved: true });
+        result.push({ recipe: getRecipe, saved: true });
       } else {
         result.push({ recipe: elem, saved: false });
       }
@@ -187,11 +154,10 @@ async function getPossibleRecipes(user) {
  */
 
 router.get('/home', requireAuth, async (req, res) => {
-  const { filter } = req.body;
   res.send({
-    popular_recipes: await getPopularRecipes(filter, req.user),
+    popular_recipes: await getPopularRecipes(req.user),
     recent_recipes: await getRecentRecipes(req.user),
-    random_recipes: await getRandomRecipes(filter, req.user),
+    random_recipes: await getRandomRecipes(req.user),
     possible_recipes: await getPossibleRecipes(req.user),
   });
 });
@@ -200,8 +166,7 @@ router.get('/home', requireAuth, async (req, res) => {
  * view most popular recipes list
  */
 router.get('/popularRecipes', requireAuth, async (req, res) => {
-  const { filter } = req.body;
-  res.send(await getPopularRecipes(filter, req.user));
+  res.send(await getPopularRecipes(req.user));
 });
 
 /**
@@ -215,8 +180,7 @@ router.get('/recentRecipes', requireAuth, async (req, res) => {
  * "Welcome Back" section. Returns 20 random recipes from the data base
  */
 router.get('/randomRecipes', requireAuth, async (req, res) => {
-  const { filter } = req.body;
-  res.send(await getRandomRecipes(filter, req.user));
+  res.send(await getRandomRecipes(req.user));
 });
 
 /**

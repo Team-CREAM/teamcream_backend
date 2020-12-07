@@ -111,77 +111,6 @@ async function filterOn(user, body, Recipes) {
   return result;
 }
 
-async function filterInventoryOff(user, body, Recipes) {
-  const {
-    search,
-    filter,
-    inventory,
-    healthy,
-    cheap,
-    popular,
-    sustainable,
-  } = body;
-  let cursor;
-  if (search === '') {
-    cursor = await Recipes.find({
-      $and: [
-        { IngredientList: { $not: { $elemMatch: { $nin: user.inventory } } } },
-        { veryHealthy: { $in: [healthy, true] } },
-        { cheap: { $in: [cheap, true] } },
-        { veryPopular: { $in: [popular, true] } },
-        { sustainable: { $in: [sustainable, true] } },
-      ],
-    }).limit(200);
-  } else {
-    cursor = await Recipes.find({
-      $and: [
-        { IngredientList: { $not: { $elemMatch: { $nin: user.inventory } } } },
-        { $text: { $search: search } },
-        { veryHealthy: { $in: [healthy, true] } },
-        { cheap: { $in: [cheap, true] } },
-        { veryPopular: { $in: [popular, true] } },
-        { sustainable: { $in: [sustainable, true] } },
-      ],
-    }).limit(200);
-  }
-  const result = await cursor.toArray();
-  return result;
-}
-async function filterOff(user, body, Recipes) {
-  const {
-    search,
-    filter,
-    inventory,
-    healthy,
-    cheap,
-    popular,
-    sustainable,
-  } = body;
-  let cursor;
-  if (search === '') {
-    cursor = await Recipes.find({
-      $and: [
-        { veryHealthy: { $in: [healthy, true] } },
-        { cheap: { $in: [cheap, true] } },
-        { veryPopular: { $in: [popular, true] } },
-        { sustainable: { $in: [sustainable, true] } },
-      ],
-    }).limit(200);
-  } else {
-    cursor = await Recipes.find({
-      $and: [
-        { $text: { $search: search } },
-        { veryHealthy: { $in: [healthy, true] } },
-        { cheap: { $in: [cheap, true] } },
-        { veryPopular: { $in: [popular, true] } },
-        { sustainable: { $in: [sustainable, true] } },
-      ],
-    }).limit(200);
-  }
-  const result = await cursor.toArray();
-  return result;
-}
-
 /**
  * creates explore recipe page where filters all recipes based off of params
  */
@@ -201,14 +130,10 @@ router.post('/explore', requireAuth, async (req, res) => {
     const Recipes = await client.db('<dbname>').collection('recipes');
     Recipes.createIndex({ title: 'text' });
     let result = null;
-    if (filter && !inventory) {
-      result = await filterOn(req.user, req.body, Recipes);
-    } else if (filter && inventory) {
+    if (inventory) {
       result = await filterInventoryOn(req.user, req.body, Recipes);
-    } else if (!filter && inventory) {
-      result = await filterInventoryOff(req.user, req.body, Recipes);
     } else {
-      result = await filterOff(req.user, req.body, Recipes);
+      result = await filterOn(req.user, req.body, Recipes);
     }
     return res.send(result);
   } catch (e) {

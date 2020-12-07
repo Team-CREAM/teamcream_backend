@@ -108,7 +108,7 @@ async function getRandomRecipes(user) {
         result.push({ recipe: elem, saved: false });
       }
     });
-    return Recipe.find().toArray();
+    return result;
   } catch (e) {
     console.log(e);
     return JSON.parse({ message: 'Error random recipes cannot be viewed' });

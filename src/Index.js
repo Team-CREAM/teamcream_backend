@@ -14,6 +14,10 @@ const inventoryRoutes = require('./routes/InventoryRoutes');
 const homepageRoutes = require('./routes/HomepageRoutes');
 const exploreRoute = require('./routes/ExploreRoute');
 
+const inventoryRoutes2 = require('./routes/InventoryRoutesTest');
+const homepageRoutes2 = require('./routes/HomepageRoutesTest');
+const exploreRoute2 = require('./routes/ExploreRouteTest');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -33,6 +37,10 @@ app.use(userRoutes);
 app.use(inventoryRoutes);
 app.use(homepageRoutes);
 app.use(exploreRoute);
+
+app.use(inventoryRoutes2);
+app.use(homepageRoutes2);
+app.use(exploreRoute2);
 
 const mongoUri =
   'mongodb+srv://cse110:gary@cwc.l4ds3.mongodb.net/<dbname>?retryWrites=true&w=majority';

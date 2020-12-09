@@ -151,7 +151,7 @@ const recipeSchema = new mongoose.Schema({
     default: 0,
   },
   extendedIngredients: {
-    type: [ingredientSchema],
+    type: [{}],
     default: null,
   },
   id: {

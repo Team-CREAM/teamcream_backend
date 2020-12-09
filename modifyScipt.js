@@ -15,7 +15,7 @@ async function copyCollection() {
   const client = new MongoClient(mongoUri);
   await client.connect();
 
-  const Recipe = client.db('<dbname>').collection('recipes');
+  const Recipe = client.db('<dbname>').collection('tempRecipes');
   const allRecipes = await Recipe.find().toArray();
 
   let i;
@@ -107,7 +107,7 @@ async function copyIngredients() {
 // }
 
 async function main() {
-  // console.log(await copyCollection());
+  console.log(await copyCollection());
   // console.log(await deleteNoImage());
   // console.log(await deleteAllUsers());
   // await copyIngredients();

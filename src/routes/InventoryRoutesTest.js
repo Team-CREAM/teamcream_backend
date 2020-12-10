@@ -58,7 +58,7 @@ async function getIngredientByName(name) {
 /**
  * Returns the actual recipe given the recipe's object id.
  */
-async function getRecipe(objectID) {
+async function getRecipe(id) {
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
@@ -66,7 +66,7 @@ async function getRecipe(objectID) {
     const result = await client
       .db('<dbname>')
       .collection('tempRecipes')
-      .findOne({ _id: new ObjectID(objectID) });
+      .findOne({ id });
     return result;
   } catch (e) {
     console.error(e);

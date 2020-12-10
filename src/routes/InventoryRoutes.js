@@ -58,7 +58,7 @@ async function getIngredientByName(name) {
 /**
  * Returns the actual recipe given the recipe's object id.
  */
-async function getRecipe(objectID) {
+async function getRecipe(id) {
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
@@ -66,7 +66,7 @@ async function getRecipe(objectID) {
     const result = await client
       .db('<dbname>')
       .collection('recipes')
-      .findOne({ _id: new ObjectID(objectID) });
+      .findOne({ id });
     return result;
   } catch (e) {
     console.error(e);
@@ -138,7 +138,7 @@ async function viewInventory(user) {
  * change the number of likes on a recipe
  */
 
-async function changeLikes(recipeId, add) {
+async function changeLikes(id, add) {
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
@@ -146,15 +146,9 @@ async function changeLikes(recipeId, add) {
     const Recipe = await client.db('<dbname>').collection('recipes');
     let result;
     if (add) {
-      result = await Recipe.updateOne(
-        { _id: new ObjectID(recipeId) },
-        { $inc: { aggregateLikes: 1 } },
-      );
+      result = await Recipe.updateOne({ id }, { $inc: { aggregateLikes: 1 } });
     } else {
-      result = await Recipe.updateOne(
-        { _id: new ObjectID(recipeId) },
-        { $inc: { aggregateLikes: -1 } },
-      );
+      result = await Recipe.updateOne({ id }, { $inc: { aggregateLikes: -1 } });
     }
     return result;
   } catch (e) {

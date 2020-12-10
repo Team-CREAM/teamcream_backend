@@ -56,9 +56,9 @@ async function getIngredientByName(name) {
 }
 
 /**
- * Returns the actual recipe given the recipe's object id.
+ * Returns the actual recipe given the recipe's id.
  */
-async function getRecipe(id) {
+async function getRecipeID(id) {
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
@@ -67,6 +67,26 @@ async function getRecipe(id) {
       .db('<dbname>')
       .collection('recipes')
       .findOne({ id });
+    return result;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await client.close();
+  }
+}
+
+/**
+ * Returns the actual recipe given the recipe's object id.
+ */
+async function getRecipeObjID(objectId) {
+  const client = new MongoClient(mongoUri);
+  try {
+    await client.connect();
+
+    const result = await client
+      .db('<dbname>')
+      .collection('recipes')
+      .findOne({ _id: new ObjectID(objectId) });
     return result;
   } catch (e) {
     console.error(e);
@@ -193,7 +213,7 @@ router.get('/savedRecipes', requireAuth, async (req, res) => {
     const result = [];
     for (i = 0; i < req.user.recipe.length; i++) {
       const newObj = {};
-      const recipe = await getRecipe(req.user.recipe[i]);
+      const recipe = await getRecipeObjID(req.user.recipe[i]);
       newObj.id = recipe._id;
       newObj.title = recipe.title;
       newObj.imageUrl = recipe.image;
@@ -234,7 +254,7 @@ router.post('/savedRecipes', requireAuth, async (req, res) => {
       newObj.recipe = req.user.recipe[i];
       newObj.count = getIngredientsInRecipe(
         req.user,
-        await getRecipe(req.user.recipe[i]),
+        await getRecipeObjID(req.user.recipe[i]),
       );
       result.push(newObj);
     }
@@ -257,7 +277,7 @@ router.post('/recipeClicked', requireAuth, async (req, res) => {
   try {
     const { recipe } = req.body;
     await addRecentRecipe(req.user, recipe);
-    const recipeObj = await getRecipe(recipe);
+    const recipeObj = await getRecipeObjID(recipe);
     const numIng = getIngredientsInRecipe(req.user, recipeObj);
     let saved = false;
     if (req.user.recipe.includes(recipe)) {

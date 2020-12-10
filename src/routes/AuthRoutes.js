@@ -78,7 +78,7 @@ router.put('/forgotpassword', async (req, res) => {
       from: 'teamZcream@gmail.com',
       to: email,
       subject: 'reset pass link',
-      text: `Here is the reset password link http://localhost:3000/resetpassword?token=${token}`,
+      text: `Here is the reset password link https://powerful-taiga-83278.herokuapp.com/resetpassword?token=${token}`,
     };
 
     mailTransporter.sendMail(mailDetails, (err, data) => {

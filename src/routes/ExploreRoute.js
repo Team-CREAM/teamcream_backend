@@ -37,7 +37,6 @@ async function filterInventoryOn(user, body, Recipes) {
         { veryHealthy: { $in: [healthy, true] } },
         { cheap: { $in: [cheap, true] } },
         { veryPopular: { $in: [popular, true] } },
-        { sustainable: { $in: [sustainable, true] } },
       ],
     }).limit(200);
   } else {
@@ -55,7 +54,6 @@ async function filterInventoryOn(user, body, Recipes) {
         { veryHealthy: { $in: [healthy, true] } },
         { cheap: { $in: [cheap, true] } },
         { veryPopular: { $in: [popular, true] } },
-        { sustainable: { $in: [sustainable, true] } },
       ],
     }).limit(200);
   }
@@ -86,7 +84,6 @@ async function filterOn(user, body, Recipes) {
         { veryHealthy: { $in: [healthy, true] } },
         { cheap: { $in: [cheap, true] } },
         { veryPopular: { $in: [popular, true] } },
-        { sustainable: { $in: [sustainable, true] } },
       ],
     }).limit(200);
   } else {
@@ -103,7 +100,6 @@ async function filterOn(user, body, Recipes) {
         { veryHealthy: { $in: [healthy, true] } },
         { cheap: { $in: [cheap, true] } },
         { veryPopular: { $in: [popular, true] } },
-        { sustainable: { $in: [sustainable, true] } },
       ],
     }).limit(200);
   }

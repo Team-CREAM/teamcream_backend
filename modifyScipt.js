@@ -15,11 +15,11 @@ async function copyCollection() {
   const client = new MongoClient(mongoUri);
   await client.connect();
 
-  const Recipe = client.db('<dbname>').collection('tempRecipes');
+  const Recipe = client.db('<dbname>').collection('recipes');
   const allRecipes = await Recipe.find().toArray();
 
   let i;
-  for (i = 2500; i < allRecipes.length; i++) {
+  for (i = 0; i < allRecipes.length; i++) {
     const ingredList = [];
     allRecipes[i].extendedIngredients.forEach((element) => {
       ingredList.push(element.id);
@@ -60,7 +60,7 @@ async function copyIngredients() {
 
   await client.connect();
 
-  const Recipe = client.db('<dbname>').collection('tempRecipes');
+  const Recipe = client.db('<dbname>').collection('recipes');
   const Ingredients = client.db('<dbname>').collection('tempIngredients');
 
   const allRecipes = await Recipe.find().toArray();
@@ -106,26 +106,11 @@ async function copyIngredients() {
 //   return 'deleted users';
 // }
 
-async function deleteBadIngredients() {
-  const client = new MongoClient(mongoUri);
-  await client.connect();
-
-  const Recipe = client.db('<dbname>').collection('recipes');
-  await Recipe.deleteMany({ image: '' });
-  await Recipe.deleteMany({ id: null });
-
-  // const Ingredients = client.db('<dbname>').collection('tempIngredients');
-  // await Ingredients.deleteMany({ id: null });
-
-  await client.close();
-  return 'deleted';
-}
 async function main() {
   // console.log(await copyCollection());
   // console.log(await deleteNoImage());
   // console.log(await deleteAllUsers());
   // await copyIngredients();
-  await deleteBadIngredients();
 }
 
 main();

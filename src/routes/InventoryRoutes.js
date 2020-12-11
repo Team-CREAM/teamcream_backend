@@ -56,29 +56,9 @@ async function getIngredientByName(name) {
 }
 
 /**
- * Returns the actual recipe given the recipe's id.
- */
-async function getRecipeID(id) {
-  const client = new MongoClient(mongoUri);
-  try {
-    await client.connect();
-
-    const result = await client
-      .db('<dbname>')
-      .collection('recipes')
-      .findOne({ id });
-    return result;
-  } catch (e) {
-    console.error(e);
-  } finally {
-    await client.close();
-  }
-}
-
-/**
  * Returns the actual recipe given the recipe's object id.
  */
-async function getRecipeObjID(objectId) {
+async function getRecipe(objectID) {
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
@@ -86,7 +66,7 @@ async function getRecipeObjID(objectId) {
     const result = await client
       .db('<dbname>')
       .collection('recipes')
-      .findOne({ _id: new ObjectID(objectId) });
+      .findOne({ _id: new ObjectID(objectID) });
     return result;
   } catch (e) {
     console.error(e);
@@ -158,7 +138,7 @@ async function viewInventory(user) {
  * change the number of likes on a recipe
  */
 
-async function changeLikes(id, add) {
+async function changeLikes(recipeId, add) {
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
@@ -166,9 +146,15 @@ async function changeLikes(id, add) {
     const Recipe = await client.db('<dbname>').collection('recipes');
     let result;
     if (add) {
-      result = await Recipe.updateOne({ id }, { $inc: { aggregateLikes: 1 } });
+      result = await Recipe.updateOne(
+        { _id: new ObjectID(recipeId) },
+        { $inc: { aggregateLikes: 1 } },
+      );
     } else {
-      result = await Recipe.updateOne({ id }, { $inc: { aggregateLikes: -1 } });
+      result = await Recipe.updateOne(
+        { _id: new ObjectID(recipeId) },
+        { $inc: { aggregateLikes: -1 } },
+      );
     }
     return result;
   } catch (e) {
@@ -213,7 +199,7 @@ router.get('/savedRecipes', requireAuth, async (req, res) => {
     const result = [];
     for (i = 0; i < req.user.recipe.length; i++) {
       const newObj = {};
-      const recipe = await getRecipeObjID(req.user.recipe[i]);
+      const recipe = await getRecipe(req.user.recipe[i]);
       newObj.id = recipe._id;
       newObj.title = recipe.title;
       newObj.imageUrl = recipe.image;
@@ -254,7 +240,7 @@ router.post('/savedRecipes', requireAuth, async (req, res) => {
       newObj.recipe = req.user.recipe[i];
       newObj.count = getIngredientsInRecipe(
         req.user,
-        await getRecipeObjID(req.user.recipe[i]),
+        await getRecipe(req.user.recipe[i]),
       );
       result.push(newObj);
     }
@@ -277,7 +263,7 @@ router.post('/recipeClicked', requireAuth, async (req, res) => {
   try {
     const { recipe } = req.body;
     await addRecentRecipe(req.user, recipe);
-    const recipeObj = await getRecipeObjID(recipe);
+    const recipeObj = await getRecipe(recipe);
     const numIng = getIngredientsInRecipe(req.user, recipeObj);
     let saved = false;
     if (req.user.recipe.includes(recipe)) {

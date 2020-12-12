@@ -61,6 +61,11 @@ const userSchema = new mongoose.Schema({
     ref: 'Ingredient',
     default: null,
   },
+  savedRecipes: {
+    type: [{}],
+    ref: 'Recipes',
+    default: null,
+  },
 });
 
 // Before save happens

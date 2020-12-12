@@ -182,18 +182,7 @@ router.post('/inventory', requireAuth, async (req, res) => {
  */
 router.get('/savedRecipes', requireAuth, async (req, res) => {
   try {
-    let i;
-    const result = [];
-    for (i = 0; i < req.user.recipe.length; i++) {
-      const newObj = {};
-      const recipe = await getRecipe(req.user.recipe[i]);
-      newObj.id = recipe._id;
-      newObj.title = recipe.title;
-      newObj.imageUrl = recipe.image;
-      newObj.count = getIngredientsInRecipe(req.user, recipe);
-      result.push(newObj);
-    }
-    return res.send(result);
+    return res.send(req.user.savedRecipes);
   } catch (e) {
     console.log(e);
     return res.json({ message: 'Error savedRecipes cannot be viewed' });
@@ -207,30 +196,28 @@ router.post('/savedRecipes', requireAuth, async (req, res) => {
   try {
     const { recipe, add } = req.body;
     await changeLikes(recipe, add);
+    const recipeObj = await getRecipe(recipe);
+    const newObj = {};
+    newObj.id = recipeObj._id;
+    newObj.title = recipeObj.title;
+    newObj.imageUrl = recipeObj.image;
     if (add) {
       if (req.user.recipe.includes(recipe)) {
         const index = req.user.recipe.indexOf(recipe);
         req.user.recipe.splice(index, 1);
+        req.user.savedRecipes.splice(index, 1);
       }
       req.user.recipe.push(recipe);
+      req.user.savedRecipes.push(newObj);
     } else {
       const index = req.user.recipe.indexOf(
         req.user.recipe.find((elem) => elem === recipe),
       );
       req.user.recipe.splice(index, 1);
+      req.user.savedRecipes.splice(index, 1);
     }
     await req.user.save();
-    let i;
-    const result = [];
-    for (i = 0; i < req.user.recipe.length; i++) {
-      const newObj = {};
-      newObj.recipe = req.user.recipe[i];
-      newObj.count = getIngredientsInRecipe(
-        req.user,
-        await getRecipe(req.user.recipe[i]),
-      );
-      result.push(newObj);
-    }
+    const result = req.user.savedRecipes;
     if (add) {
       return res.json({ message: 'Success recipe added', result });
     }

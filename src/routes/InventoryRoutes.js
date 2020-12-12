@@ -116,21 +116,9 @@ async function inventoryUpdate(ingredients, user) {
     newInventory.push(await ingObj.id);
     ingObjs.push(await ingObj);
   }
-  user.inventory = await newInventory;
+  user.inventory = newInventory;
+  user.allIngredients = ingObjs;
   await user.save();
-  return Promise.all(ingObjs);
-}
-
-/**
- * update the inventory with new ingredients
- */
-async function viewInventory(user) {
-  const ingObjs = [];
-  let i;
-  for (i = 0; i < user.inventory.length; i++) {
-    const ingObj = await getIngredient(user.inventory[i]);
-    ingObjs.push(await ingObj);
-  }
   return Promise.all(ingObjs);
 }
 
@@ -169,8 +157,7 @@ async function changeLikes(recipeId, add) {
  */
 router.get('/inventory', requireAuth, async (req, res) => {
   try {
-    console.log(req.user.inventory);
-    return res.send(await viewInventory(req.user));
+    return res.send(req.user.allIngredients);
   } catch (e) {
     console.log(e);
     return res.json({ message: 'Error inventory cannot be viewed' });

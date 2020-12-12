@@ -11,6 +11,26 @@ require('./src/models/Ingredient');
 const mongoUri =
   'mongodb+srv://cse110:gary@cwc.l4ds3.mongodb.net/<dbname>?retryWrites=true&w=majority';
 
+/**
+ * Returns the actual ingredient given the ingredient's id.
+ */
+async function getIngredient(id) {
+  const client = new MongoClient(mongoUri);
+  try {
+    await client.connect();
+
+    const result = await client
+      .db('<dbname>')
+      .collection('tempIngredients')
+      .findOne({ id });
+    return result;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await client.close();
+  }
+}
+
 async function copyCollection() {
   const client = new MongoClient(mongoUri);
   await client.connect();
@@ -95,6 +115,31 @@ async function copyIngredients() {
   return 'done';
 }
 
+async function modifyUsers() {
+  const client = new MongoClient(mongoUri);
+  await client.connect();
+
+  const Ingredients = client.db('<dbname>').collection('tempIngredients');
+  const Users = client.db('<dbname>').collection('users');
+
+  const allUsers = await Users.find().toArray();
+  let i;
+
+  for (i = 0; i < allUsers.length; i++) {
+    const ingredList = [];
+    let j;
+    for (j = 0; j < allUsers[i].inventory.length; j++) {
+      const inv = allUsers[i].inventory;
+      const ingred = await getIngredient(inv[j]);
+      ingredList.push(await ingred);
+    }
+    await Users.updateOne(
+      { _id: allUsers[i]._id },
+      { $set: { allIngredients: ingredList } },
+    );
+  }
+  return 'done';
+}
 // async function deleteDuplicates() {
 //   const client = new MongoClient(mongoUri);
 //   await client.connect();
@@ -111,6 +156,7 @@ async function main() {
   // console.log(await deleteNoImage());
   // console.log(await deleteAllUsers());
   // await copyIngredients();
+  // console.log(await modifyUsers());
 }
 
 main();

@@ -140,6 +140,33 @@ async function modifyUsers() {
   }
   return 'done';
 }
+
+async function DeleteNullIngredients() {
+  const client = new MongoClient(mongoUri);
+  const Ingredient = mongoose.model('Ingredient');
+
+  await client.connect();
+
+  const Recipe = client.db('<dbname>').collection('recipes');
+  const Ingredients = client.db('<dbname>').collection('tempIngredients');
+
+  const allRecipes = await Recipe.find().toArray();
+
+  let i;
+  for (i = 0; i < allRecipes.length; i++) {
+    const extIngreds = allRecipes[i].extendedIngredients;
+    let m;
+    for (m = 0; m < extIngreds.length; m++) {
+      if (extIngreds[m].id === null) {
+        console.log(extIngreds[m].name);
+        extIngreds.splice(m, 1);
+      }
+    }
+  }
+  await client.close();
+  return 'done';
+}
+
 // async function deleteDuplicates() {
 //   const client = new MongoClient(mongoUri);
 //   await client.connect();
@@ -157,6 +184,7 @@ async function main() {
   // console.log(await deleteAllUsers());
   // await copyIngredients();
   // console.log(await modifyUsers());
+  // console.log(await DeleteNullIngredients());
 }
 
 main();

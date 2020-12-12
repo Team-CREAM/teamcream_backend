@@ -78,7 +78,7 @@ async function getPopularRecipes(user) {
           },
         },
         { $sort: { aggregateLikes: -1 } },
-        { $sample: { size: 50 } },
+        { $sample: { size: 20 } },
       ]);
     const temp = await cursor.toArray();
     const result = [];
@@ -115,7 +115,7 @@ async function getRandomRecipes(user) {
           ],
         },
       },
-      { $sample: { size: 50 } },
+      { $sample: { size: 20 } },
     ]);
     const temp = await cursor.toArray();
     const result = [];

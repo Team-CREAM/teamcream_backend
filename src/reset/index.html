@@ -18,10 +18,10 @@
   <div class="elelment">
     <div class="element-main" id="reset_form">
       <h1 id="hi">Reset Password</h1>
-      <p> Create a new password that is at least 6 characters long. A strong password is combination of letters,
+      <p> Create a new password that is at least 4 characters long. A strong password is combination of letters,
         numbers, and punctuation marks.</p>
       <form id="form1">
-        <input pattern=".{6,}" id="password" type="password" value="Your new password" onfocus="this.value = '';"
+        <input pattern=".{4,}" id="password" type="password" value="Your new password" onfocus="this.value = '';"
           onblur="if (this.value == '') {this.value = 'Your new password';}">
         <p> Please re-enter your new password</p>
         <input id="confirmPassword" type="password" value="Confirm password" onfocus="this.value = '';"

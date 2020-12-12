@@ -15,7 +15,7 @@
     <div class="elelment">
         <div class="element-main" id="reset_form" style="height: 300px">
             <h1>Team Crumbs</h1>
-            <p> Your Passowrd has been changed.</p>
+            <p> Your password has been changed.</p>
             <p>This is a confirmation that your password was changed at
             <p id="time" style="font-family: Georgia, 'Times New Roman', Times, serif font-size: x-large;">
             </p>
@@ -34,27 +34,22 @@
         minute = n.getMinutes();
 
         if (h == 0) {
+          h = 12;
+        } else if (h >= 12) {
+          if (h == 12) {
             h = 12;
+            mid = 'pm';
+          } else {
+            h %= 12;
+            mid = 'pm';
+          }
         }
-        else if (h >= 12) {
-            if (h == 12) {
-                h = 12
-                mid = 'pm';
-            }
-            else {
-                h = h % 12;
-                mid = 'pm';
-            }
-
+        if (minute / 10 < 1) {
+          document.getElementById('time').innerHTML = `${h}:` + `0${minute} ${mid}`;
+        } else {
+          document.getElementById('time').innerHTML = `${h}:${minute} ${mid}`;
         }
-        if ((minute / 10) < 1) {
-            document.getElementById("time").innerHTML = h + ":" + "0" + minute + " " + mid;
-        }
-        else {
-            document.getElementById("time").innerHTML = h + ":" + minute + " " + mid;
-        }
-        document.getElementById("date").innerHTML = m + "/" + d + "/" + y;
-
+        document.getElementById('date').innerHTML = `${m}/${d}/${y}`;
     </script>
     <script src="reset.js"></script>
 </body>

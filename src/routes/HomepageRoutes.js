@@ -78,7 +78,7 @@ async function getPopularRecipes(user) {
           },
         },
         { $sort: { aggregateLikes: -1 } },
-        { $sample: { size: 20 } },
+        { $sample: { size: 50 } },
       ]);
     const temp = await cursor.toArray();
     const result = [];
@@ -115,7 +115,7 @@ async function getRandomRecipes(user) {
           ],
         },
       },
-      { $sample: { size: 20 } },
+      { $sample: { size: 50 } },
     ]);
     const temp = await cursor.toArray();
     const result = [];
@@ -187,7 +187,7 @@ router.get('/recentRecipes', requireAuth, async (req, res) => {
 });
 
 /**
- * "Welcome Back" section. Returns 20 random recipes from the data base
+ * "Welcome Back" section. Returns 50 random recipes from the data base
  */
 router.get('/randomRecipes', requireAuth, async (req, res) => {
   res.send(await getRandomRecipes(req.user));
